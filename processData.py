@@ -20,6 +20,8 @@ def convertHairpinBulgeInternal():
             skips -= 1
             continue
         tokens = line.split()
+        if tokens[1] is ".":
+            continue
         # size column
         for f in [hairpinFile, bulgeFile, internalFile]:
             f.write(tokens[0])
@@ -78,7 +80,8 @@ def convertStack():
         for i in range(len(tokens)):
             energy = tokens[i]
             if energy is ".":
-                energy = "Inf"
+                continue
+                ##energy = "Inf"
             inner3prime = intToBase(i % 4)
             outer3prime = intToBase(i // 4)
             outer5prime = intToBase(outer5primeIndex)
@@ -112,7 +115,8 @@ def convertDangles():
         for i in range(len(tokens)):
             energy = tokens[i]
             if energy is ".":
-                energy = "Inf"
+                continue
+                #energy = "Inf"
             dangleBase = intToBase(i % 4)
             base3prime = intToBase(i // 4)
             base5prime = intToBase(index5prime)
@@ -149,7 +153,8 @@ def convertTerminalStack():
         for i in range(len(tokens)):
             energy = tokens[i]
             if energy is ".":
-                energy = "Inf"
+                continue;
+                #energy = "Inf"
             inner3prime = intToBase(i % 4)
             outer3prime = intToBase(i // 4)
             outer5prime = intToBase(outer5primeIndex)

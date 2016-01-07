@@ -1,3 +1,4 @@
+
 double HairpinTerm(int i, int j)
 {
   double energy;
