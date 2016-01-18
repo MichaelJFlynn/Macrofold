@@ -3,19 +3,20 @@
 #include "EnergyModel.h"
 #include "RNA.h"
 #include "DataFile.h"
+#include "EnergyFunctions.h"
 #include <stdio.h>
 
-int main(int argc, char* argv[]) {
-  RNA* rna = allocateRNA();
-  
-  printf("RNA loaded.\n");
-  
-  // TODO: might have to change this to something different for every
-  // operating system... damn
-  DataFile* data = readCSV("..\\data\\stack.csv");
-  freeDataFile(data);
 
-  freeRNA(rna);
+
+
+int main(int argc, char* argv[]) {
+  // tests 
+  RNA* strand = readSequenceFile("sample.seq");
+  
+  printf("%g\n", hairpinTerm(strand, 3, 7));
+  
+
+  freeRNA(strand);
   printf("RNA freed.\n");
   return 0;
 }

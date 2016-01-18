@@ -9,21 +9,23 @@ typedef double** PartitionFunctionMatrix;
 typedef double* PartitionFunctionVector;
 
 typedef struct {
-  PartitionFunctionVector Z;
-  PartitionFunctionMatrix Zb;
-  PartitionFunctionMatrix Z1;
-  PartitionFunctionMatrix Z2;
+  double* Z;
+  double** Zb;
+  double** Z1;
+  double** Z2;
 } PartitionFunctionData;
 
 typedef struct RNA {
   int length;
+  char* sequence;
+  // sequence mapped to integers (see EnergyModel.h -> baseMap):
+  int* intSequence;
   double temperature;
   EnergyModel* energyModel;
   PartitionFunctionData pfData;
 } RNA;
 
-int initialized(RNA* strand);
-
-RNA* allocateRNA();
+RNA* allocateRNA(char* sequence);
+RNA* readSequenceFile(char* filename);
 void freeRNA(RNA* strand);
 #endif
