@@ -1,5 +1,8 @@
 #ifndef ENERGYFUNCTIONS_H
 #define ENERGYFUNCTIONS_H
+
+#define TURN 3
+
 // forward declaration of RNA, for the compiler
 struct RNA;
 typedef struct RNA RNA;

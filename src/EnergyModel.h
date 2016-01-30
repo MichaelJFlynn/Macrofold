@@ -36,6 +36,9 @@ typedef struct EnergyModel {
   // TODO:
   // * coaxial?
   // * coaxstack?
+  double multiA;
+  double multiB;
+  double multiC;
   double dangle3[4][4][4];
   double dangle5[4][4][4];
   HexaLoop hexaloop[NUM_HEXALOOPS];
@@ -57,6 +60,7 @@ typedef struct EnergyModel {
   // * tstacki23
   // * tstackm
   double* scale;
+  double* bscale;
 } EnergyModel;
 
 int baseMap(char* c);

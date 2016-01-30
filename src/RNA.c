@@ -1,5 +1,6 @@
 #include "RNA.h"
 #include "EnergyModel.h"
+#include "AllowedPairs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +19,7 @@ RNA* allocateRNA(char* sequence) {
   }
 
   newStrand->temperature = 37; // celcius
-
+  newStrand->allowedPairs = fromAllPairs(newStrand->length);
   initializeEnergyModel(newStrand);
   //printf("%g\n", newStrand->energyModel->stack[0][1][2][3]);
 
@@ -29,6 +30,7 @@ void freeRNA(RNA* strand) {
   free(strand->sequence);
   free(strand->intSequence);
   freeEnergyModel(strand);
+  freeAllowedPairs(strand->allowedPairs);
   free(strand);
 }
 
@@ -43,8 +45,8 @@ RNA* readSequenceFile(char* filename) {
   }
 
   char seqBuffer[MAX_SEQUENCE_LENGTH];
-  
-  if(fgets(seqBuffer, MAX_SEQUENCE_LENGTH, fp) || (length = strlen(seqBuffer)) > MAX_SEQUENCE_LENGTH) {
+  fgets(seqBuffer, MAX_SEQUENCE_LENGTH, fp);
+  if( (length = strlen(seqBuffer)) > MAX_SEQUENCE_LENGTH) {
     printf("Input sequence is longer than MAX_SEQUENCE_LENGTH: 10000\n");
     exit(1);
   }

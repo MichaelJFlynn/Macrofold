@@ -44,12 +44,24 @@ void initializeEnergyModel(RNA* strand) {
   for(i = 0; i < size; i++) {
     filler[i] = INFINITY;
   }
-
+  
+  strand->energyModel->multiA = 1;
+  strand->energyModel->multiB = 1;
+  strand->energyModel->multiC = 1;
+  
   strand->energyModel->scale = (double*) malloc(strand->length + 1 * sizeof(double));
   strand->energyModel->scale[0] = 1;
   for(i = 1; i <= strand->length; i++) {
     strand->energyModel->scale[i] = strand->energyModel->scale[i-1] * SCALE_PARAMETER;
   }
+
+  strand->energyModel->bscale = (double*) malloc(strand->length + 1 * sizeof(double));
+  strand->energyModel->bscale[0] = 1;
+  for(i = 1; i <= strand->length; i++) {
+    strand->energyModel->bscale[i] = strand->energyModel->bscale[i-1] * strand->energyModel->multiB / SCALE_PARAMETER;
+  }
+
+  
 
   loadStack(strand); 
   loadHairpin(strand);
@@ -65,6 +77,7 @@ void initializeEnergyModel(RNA* strand) {
 
 void freeEnergyModel(RNA* strand) {
   free(strand->energyModel->scale);
+  free(strand->energyModel->bscale);
   free(strand->energyModel);
 }
 

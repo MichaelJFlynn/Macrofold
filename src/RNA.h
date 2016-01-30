@@ -5,6 +5,9 @@
 struct EnergyModel;
 typedef struct EnergyModel EnergyModel;
 
+struct AllowedPairs;
+typedef struct AllowedPairs AllowedPairs;
+
 typedef double** PartitionFunctionMatrix;
 typedef double* PartitionFunctionVector;
 
@@ -23,6 +26,7 @@ typedef struct RNA {
   double temperature;
   EnergyModel* energyModel;
   PartitionFunctionData pfData;
+  AllowedPairs* allowedPairs;
 } RNA;
 
 RNA* allocateRNA(char* sequence);

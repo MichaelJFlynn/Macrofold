@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 
-#define TURN 3
+
 // used to be g_misc[12]
 #define HAIRPINBASE 37
 #define MAXLOOP 10
@@ -125,11 +125,13 @@ double stackTerm(RNA* strand, int i, int j)
   return strand->energyModel->stack[nSeq[i]][nSeq[j]][nSeq[i + 1]][nSeq[j - 1]];
 }
 
-/* double etstackm(RNA* strand, int i, int j) */
-/* { */
-/*   int* nSeq = strand->intSequence; */
-/*   return strand->energyModel->stackm[g_seq[j]][g_seq[i]][g_seq[j + 1]][g_seq[i - 1]]; */
-/* } */
+double etstackm(RNA* strand, int i, int j)
+{
+  return 1.0;
+  //  int* nSeq = strand->intSequence;
+
+  //return strand->energyModel->stackm[g_seq[j]][g_seq[i]][g_seq[j + 1]][g_seq[i - 1]];
+}
 
 double ed3(RNA* strand, int i, int j)
 {
