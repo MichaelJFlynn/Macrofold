@@ -11,7 +11,7 @@ AllowedPairs* fromAllPairs(int length) {
   ap->ji = (PairIterator**) malloc(length * sizeof(PairIterator*));
   ap->ij = (PairIterator**) malloc(length * sizeof(PairIterator*));
 
-  for(i =0; i <= length; i++) {
+  for(i =0; i < length; i++) {
     ap->ij[i] = allocatePairIterator(length);
     ap->ji[i] = allocatePairIterator(length);
   }
@@ -31,7 +31,10 @@ AllowedPairs* fromAllPairs(int length) {
 }
 
 void freeAllowedPairs(AllowedPairs* allowedPairs) {
-  freePairIterator(allowedPairs->ij);
-  freePairIterator(allowedPairs->ji);
+  int i;
+  for(i = 0; i < allowedPairs->size; i++) { 
+    freePairIterator(allowedPairs->ij[i]);
+    freePairIterator(allowedPairs->ji[i]);
+  }
   free(allowedPairs);
 }

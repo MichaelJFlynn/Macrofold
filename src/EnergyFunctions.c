@@ -1,6 +1,7 @@
 #include "RNA.h"
 #include "EnergyModel.h"
 #include "EnergyFunctions.h"
+#include "PartitionFunction.h"
 #include <math.h>
 #include <string.h>
 
@@ -97,7 +98,7 @@ double bulgeInternalTerm(RNA* strand, int i, int j)
 {
   int d, ii, jj;
   double energy = 0.0;
-  double** Zb = strand->pfData.Zb;
+  double** Zb = strand->partitionFunction->Zb;
 
   for (d = j - i - 3; d >= TURN + 1 && d >= j - i - 2 - MAXLOOP; --d)
     for (ii = i + 1; ii < j - d && ii <= strand->length; ++ii)

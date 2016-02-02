@@ -14,13 +14,17 @@ RNA* allocateRNA(char* sequence) {
   newStrand->sequence = sequence;
   newStrand->length = strlen(sequence);
   newStrand->intSequence = malloc(newStrand->length * sizeof(int));
+
   for(i=0; i < newStrand->length; i++) {
     newStrand->intSequence[i] = baseMap(&newStrand->sequence[i]);
   }
 
   newStrand->temperature = 37; // celcius
   newStrand->allowedPairs = fromAllPairs(newStrand->length);
+
   initializeEnergyModel(newStrand);
+
+
   //printf("%g\n", newStrand->energyModel->stack[0][1][2][3]);
 
   return newStrand;

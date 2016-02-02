@@ -1,3 +1,6 @@
+#ifndef PAIRITERATOR_H
+#define PAIRITERATOR_H
+
 typedef struct PairIterator {
   int* pairs;
   int size;
@@ -11,3 +14,5 @@ int hasNext(PairIterator* pairIterator);
 int next(PairIterator* pairIterator);
 void start(PairIterator* pairIterator);
 void add(PairIterator* pairIterator, int element);
+
+#endif

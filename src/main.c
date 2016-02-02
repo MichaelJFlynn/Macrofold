@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
   
   printf("%g\n", hairpinTerm(strand, 3, 7));
   
-
   freeRNA(strand);
   printf("RNA freed.\n");
   return 0;

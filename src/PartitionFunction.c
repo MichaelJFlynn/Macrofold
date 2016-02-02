@@ -5,18 +5,19 @@
 #include "EnergyModel.h"
 #include "AllowedPairs.h"
 #include "PairIterator.h"
+#include "PartitionFunction.h"
 
 #define TURN 3
 #define auPenalty(i, j) 1
 
 
-void computePartitionFunction(RNA* strand) {
+void fillZbZ1Z2(RNA* strand) {
   int i, j, k;
   
   //  double* Z = strand->pfData.Z;
-  double** Zb = strand->pfData.Zb;
-  double** Z2 = strand->pfData.Z2;
-  double** Z1 = strand->pfData.Z1;
+  double** Zb = strand->partitionFunction->Zb;
+  double** Z2 = strand->partitionFunction->Z2;
+  double** Z1 = strand->partitionFunction->Z1;
 
   double multiA = 1;//strand.energyModel.multiA;
   double multiB = 1;//strand.energyModel.multiB;
@@ -93,10 +94,10 @@ void computePartitionFunction(RNA* strand) {
 }
 
 
-void computeQ53FAST(RNA* strand) {
+void fillZ(RNA* strand) {
   int j, k;
-  double* Z = strand->pfData.Z;
-  double** Zb = strand->pfData.Zb;
+  double* Z = strand->partitionFunction->Z;
+  double** Zb = strand->partitionFunction->Zb;
   double* scale = strand->energyModel->scale;
   PairIterator* iterator;
   PairIterator* iteratorMinus1;

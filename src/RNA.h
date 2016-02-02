@@ -1,22 +1,15 @@
 #ifndef RNA_H
 #define RNA_H
 
-// forward declaration, for compiler
+// forward declarations, for compiler
 struct EnergyModel;
 typedef struct EnergyModel EnergyModel;
 
 struct AllowedPairs;
 typedef struct AllowedPairs AllowedPairs;
 
-typedef double** PartitionFunctionMatrix;
-typedef double* PartitionFunctionVector;
-
-typedef struct {
-  double* Z;
-  double** Zb;
-  double** Z1;
-  double** Z2;
-} PartitionFunctionData;
+struct PartitionFunction;
+typedef struct PartitionFunction PartitionFunction;
 
 typedef struct RNA {
   int length;
@@ -25,7 +18,7 @@ typedef struct RNA {
   int* intSequence;
   double temperature;
   EnergyModel* energyModel;
-  PartitionFunctionData pfData;
+  PartitionFunction* partitionFunction;
   AllowedPairs* allowedPairs;
 } RNA;
 
