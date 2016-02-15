@@ -10,20 +10,61 @@
 #define TURN 3
 #define auPenalty(i, j) 1
 
+PartitionFunction* allocatePartitionFunction(int length) {
+  PartitionFunction* ret = (PartitionFunction*) malloc(sizeof(PartitionFunction));
+  ret->filledZbZ1Z2 = 0;
+  ret->filledZ = 0;
+  ret->Z = (double*) malloc(length * sizeof(double));
+  ret->Zb = (double**) malloc(length * sizeof(double*));
+  ret->Z1 = (double**) malloc(length * sizeof(double*));
+  ret->Z2 = (double**) malloc(length * sizeof(double*));
+  
+  int i, j;
+  for(i=0; i < length; i++) {
+    ret->Zb[i] = (double*) malloc(length * sizeof(double));
+    ret->Z1[i] = (double*) malloc(length * sizeof(double));
+    ret->Z2[i] = (double*) malloc(length * sizeof(double));
+    ret->Z[i] = 0;
+    for(j=0; j<length; j++) {
+      ret->Zb[i][j] = 0;
+      ret->Z1[i][j] = 0;
+      ret->Z2[i][j] = 0;
+    }
+  }
+
+  return ret;
+}
+
+void freePartitionFunction(RNA* strand) {
+  int i;  
+  PartitionFunction* ret = strand->partitionFunction;
+  for(i = 0; i < strand->length; i++) {
+    free(ret->Zb[i]);
+    free(ret->Z1[i]);
+    free(ret->Z2[i]);
+  }
+  free(ret->Z);
+  free(ret->Zb);
+  free(ret->Z1);
+  free(ret->Z2);
+  free(ret);
+}
 
 void fillZbZ1Z2(RNA* strand) {
-  int i, j, k;
-  
+  int i, j, k;  
+
   //  double* Z = strand->pfData.Z;
   double** Zb = strand->partitionFunction->Zb;
   double** Z2 = strand->partitionFunction->Z2;
   double** Z1 = strand->partitionFunction->Z1;
+
 
   double multiA = 1;//strand.energyModel.multiA;
   double multiB = 1;//strand.energyModel.multiB;
   double multiC = 1;//strand.energyModel.multiC;
   double scale = strand->energyModel->scale[1];
   double* bscale = strand->energyModel->bscale;
+
   /*
     Recurrence relations:
     Z(i, i) = 1
@@ -42,7 +83,7 @@ void fillZbZ1Z2(RNA* strand) {
     + e^{-\beta b} Z1(i+1, j)
    */
 
-  for (j = 2; j < strand->length; ++j)
+  for (j = TURN + 1; j < strand->length; ++j)
     for (i = j - TURN - 1; i >= 0; --i)
       {
 	double au = auPenalty(i, j);
@@ -62,7 +103,7 @@ void fillZbZ1Z2(RNA* strand) {
 
 	Z2[i][j] = multiB * Z2[i+1][j] / scale;
 	Z1[i][j] = multiB * Z1[i+1][j] / scale;	
-	for(start(iterator); hasNext(iterator); k = next(iterator)) {
+	for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
 	  if(k > j) break;
 	  Z1[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * bscale[j-k];	  
 	  if(k < j) { 
@@ -76,7 +117,7 @@ void fillZbZ1Z2(RNA* strand) {
 	  }
 	}
 
-	for(start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
+	for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
 	  if(k > j) break;
 	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k);
 	  if(k < j) { 
@@ -89,8 +130,10 @@ void fillZbZ1Z2(RNA* strand) {
 	    }
 	  }
 	}
-
+	
       }
+
+  strand->partitionFunction->filledZbZ1Z2 = 1;
 }
 
 
@@ -109,7 +152,7 @@ void fillZ(RNA* strand) {
 
     Z[j] = Z[j - 1] / scale[1];
     iterator = strand->allowedPairs->ji[j];
-    for(start(iterator); hasNext(iterator); k = next(iterator)) {
+    for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
       if(k < 0) break;
       Z[j] += auPenalty(k, j) * Zb[k][j] / scale[k - 1];
       if(k > 1) {
@@ -122,7 +165,7 @@ void fillZ(RNA* strand) {
     }
       
     iteratorMinus1 = strand->allowedPairs->ji[j-1];
-    for(start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
+    for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       if(k < 0) break;
       Z[j] += auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
       if(k > 1) {
@@ -135,7 +178,7 @@ void fillZ(RNA* strand) {
     
     }
   }
-
+  strand->partitionFunction->filledZ = 1;
   /* for (i = strand.length - 1; i >= 1; --i) { */
   /*   Z(i, strand.length) = Z(i + 1, strand.length) / scale; */
 

@@ -9,6 +9,8 @@ typedef struct PartitionFunction {
   double** Zb;
   double** Z1;
   double** Z2;
+  int filledZbZ1Z2;
+  int filledZ;
 } PartitionFunction;
 
 PartitionFunction* allocatePartitionFunction(int length);

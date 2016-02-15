@@ -4,7 +4,7 @@
 typedef struct PairIterator {
   int* pairs;
   int size;
-  int iterator;
+  int iterator; // TODO: int* ?
   int maxSize;
 } PairIterator;
 
@@ -12,7 +12,7 @@ PairIterator* allocatePairIterator(int ms);
 void freePairIterator();
 int hasNext(PairIterator* pairIterator);
 int next(PairIterator* pairIterator);
-void start(PairIterator* pairIterator);
+int start(PairIterator* pairIterator);
 void add(PairIterator* pairIterator, int element);
 
 #endif

@@ -32,8 +32,9 @@ int next(PairIterator* pairIterator) {
   return ret;
 }
 
-void start(PairIterator* pairIterator) {
+int start(PairIterator* pairIterator) {
   pairIterator->iterator = 0;
+  return pairIterator->pairs[0];
 }
 
 void add(PairIterator* pairIterator, int element) {
