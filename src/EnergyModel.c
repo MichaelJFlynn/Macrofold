@@ -6,6 +6,8 @@
 
 #define SCALE_PARAMETER 1
 
+const double R = .0019872;
+
 // A = 0, C = 1, G = 2, U = 3
 int baseMap(char* letter) {
   char c = *letter;
@@ -25,23 +27,9 @@ int baseMap(char* letter) {
 }
 
 void initializeEnergyModel(RNA* strand) {
-  int i, size;
-  double* filler;
+  int i;
 
-  // cheap, lazy, perhaps dangerous hack to initialize EnergyModel to
-  // contain INFINITY's in all the missing spaces in the arrays.
-  strand->energyModel = malloc(sizeof(EnergyModel));
-  if(! (sizeof(EnergyModel) % sizeof(double)) == 0) {
-    printf("EnergyModel is not an even multiple of doubles\n");
-    exit(1);
-  }
-  size = sizeof(EnergyModel) / sizeof(double);
-  filler = (double*) strand->energyModel;
-  for(i = 0; i < size; i++) {
-    filler[i] = INFINITY;
-  }
-
-
+  strand->energyModel = calloc(1, sizeof(EnergyModel));
 
   strand->energyModel->multiA = 1;
   strand->energyModel->multiB = 1;
@@ -86,7 +74,7 @@ void loadStack(RNA* strand) {
       strand->energyModel->stack[baseMap(get(stackData,i,0))]
 	[baseMap(get(stackData,i,1))]
 	[baseMap(get(stackData,i,2))]
-	[baseMap(get(stackData,i,3))] = atof(get(stackData,i,4));
+	[baseMap(get(stackData,i,3))] = exp(-atof(get(stackData,i,4)) / (R * strand->temperature)) / strand->energyModel->scale[2];
   }  
   freeDataFile(stackData);
 }
@@ -94,20 +82,22 @@ void loadStack(RNA* strand) {
 void loadHairpin(RNA* strand) {
   DataFile* hairpinData = readCSV("../data/hairpin.csv");
   int i;
-  // hardcoded in length
-  for(i = 0; i < hairpinData->nrow; i++) {
-    strand->energyModel->hairpinLoop[atoi(get(hairpinData, i, 0))] = atof(get(hairpinData, i,1));
-  }
 
+  for(i = 0; i < hairpinData->nrow; i++) {
+    int k = atoi(get(hairpinData, i, 0));
+    strand->energyModel->hairpinLoop[k] = exp(-atof(get(hairpinData, i,1)) / (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
+  }
+ 
   freeDataFile(hairpinData);
 }
 
 void loadInternal(RNA* strand) {
   DataFile* internalData = readCSV("../data/internal.csv");
   int i;
-  // hardcoded in length
+
   for(i = 0; i < internalData->nrow; i++) {
-    strand->energyModel->internalLoop[atoi(get(internalData, i, 0))] = atof(get(internalData, i, 1));
+    int k = atoi(get(internalData, i, 0));
+    strand->energyModel->internalLoop[k] = exp(-atof(get(internalData, i, 1))/(R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
   }
   freeDataFile(internalData);
 }
@@ -116,7 +106,8 @@ void loadBulge(RNA* strand) {
   DataFile* bulgeData = readCSV("../data/bulge.csv");
   int i;
   for(i = 0; i < bulgeData->nrow; i++) {
-    strand->energyModel->bulgeLoop[atoi(get(bulgeData, i, 0))] = atof(get(bulgeData,i,1));
+    int k = atoi(get(bulgeData, i, 0));
+    strand->energyModel->bulgeLoop[k] = exp(-atof(get(bulgeData,i,1))/ (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
   }
 
   freeDataFile(bulgeData);
@@ -129,7 +120,7 @@ void load3dangle(RNA* strand) {
     strand->energyModel->dangle3
       [baseMap(get(dangleData, i, 0))]
       [baseMap(get(dangleData, i, 1))]
-      [baseMap(get(dangleData, i, 2))] = atof(get(dangleData, i, 3));
+      [baseMap(get(dangleData, i, 2))] = exp(-atof(get(dangleData, i, 3))/ (R * strand->temperature)) / strand->energyModel->scale[1];
   }
   freeDataFile(dangleData);
 }
@@ -141,7 +132,7 @@ void load5dangle(RNA* strand) {
     strand->energyModel->dangle5
       [baseMap(get(dangleData, i, 0))]
       [baseMap(get(dangleData, i, 1))]
-      [baseMap(get(dangleData, i, 2))] = atof(get(dangleData, i, 3));
+      [baseMap(get(dangleData, i, 2))] = exp(-atof(get(dangleData, i, 3))/ (R * strand->temperature)) / strand->energyModel->scale[1];
 
   }
   freeDataFile(dangleData);
@@ -156,7 +147,7 @@ void loadTStack(RNA* strand) {
       [baseMap(get(stackData, i, 0))]
       [baseMap(get(stackData, i, 1))]
       [baseMap(get(stackData, i, 2))]
-      [baseMap(get(stackData, i, 3))] = atof(get(stackData, i, 4));
+      [baseMap(get(stackData, i, 3))] = exp(-atof(get(stackData, i, 4)) / (R * strand->temperature)) / strand->energyModel->scale[2];
   }
   freeDataFile(stackData);
 }
@@ -172,7 +163,7 @@ void loadTloop(RNA* strand) {
 
   for(i = 0; i < tloopData->nrow; i++) {
     memcpy(strand->energyModel->tloop[i].loop, get(tloopData,i, 0), 6);
-    strand->energyModel->tloop[i].energy = atof(get(tloopData, i, 1));
+    strand->energyModel->tloop[i].energy = exp(-atof(get(tloopData, i, 1)) / (R * strand->temperature));
   }
   freeDataFile(tloopData);
 }
@@ -188,7 +179,7 @@ void loadHexaloop(RNA* strand) {
 
   for(i = 0; i < hexaData->nrow; i++) {
     memcpy(strand->energyModel->hexaloop[i].loop, get(hexaData, i, 0), 8);
-    strand->energyModel->hexaloop[i].energy =  atof(get(hexaData, i,1));
+    strand->energyModel->hexaloop[i].energy =  exp(-atof(get(hexaData, i,1))/(R * strand->temperature));
   }
   freeDataFile(hexaData);
 }
@@ -204,7 +195,7 @@ void loadTriloop(RNA* strand) {
 
   for(i = 0; i < triData->nrow; i++) {
     memcpy(strand->energyModel->triloop[i].loop, get(triData, i, 0), 5);
-    strand->energyModel->triloop[i].energy = atof(get(triData, i, 1));
+    strand->energyModel->triloop[i].energy = exp(-atof(get(triData, i, 1))/ (R * strand->temperature));
   }
 }
 

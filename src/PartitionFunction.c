@@ -1,4 +1,4 @@
-// Written by Mike Flynn, 2015
+// Written by Mike Flynn, 2015-2016
 
 #include "EnergyFunctions.h"
 #include "RNA.h"
@@ -87,19 +87,17 @@ void fillZbZ1Z2(RNA* strand) {
     for (i = j - TURN - 1; i >= 0; --i)
       {
 	double au = auPenalty(i, j);
-	//double Qmulti = 0;
-	double Zmulti = 0; 
+
 	PairIterator* iterator = strand->allowedPairs->ij[i];
 	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
 
-	if(Zb[i][j] != 0.0) {
-	  Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
-	  Zmulti += multiA * multiC * au * (Z2[i+1][j-1] 
-					    + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
-					    + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
-					    + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);
-	  Zb[i][j] += Zmulti;
-	}
+
+	Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
+	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
+					  + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
+					  + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
+					  + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);
+	
 
 	Z2[i][j] = multiB * Z2[i+1][j] / scale;
 	Z1[i][j] = multiB * Z1[i+1][j] / scale;	
@@ -146,7 +144,6 @@ void fillZ(RNA* strand) {
   PairIterator* iteratorMinus1;
 
   Z[0] = 0.0;
-  Z[strand->length - 1] = 0.0;
 
   for (j = 1; j < strand->length; ++j) {
 
@@ -179,31 +176,102 @@ void fillZ(RNA* strand) {
     }
   }
   strand->partitionFunction->filledZ = 1;
-  /* for (i = strand.length - 1; i >= 1; --i) { */
-  /*   Z(i, strand.length) = Z(i + 1, strand.length) / scale; */
+}
 
-  /*   for(index=0; pfc.ij[i][index] != 0 && pfc.ij[i][index] <= strand.length; ++index) { */
-  /*     k = pfc.ij[i][index]; */
-  /*     Z(i,strand.length) += auPenalty(i, k) * Zb(i, k)/scalen[strand.length - k]; */
-  /*     if(k < strand.length) { */
-  /* 	Z(i,strand.length) += auPenalty(i, k) * Zb(i, k) * Z(k+1, strand.length); */
-  /* 	Z(i, strand.length) += auPenalty(i, k) * Zb(i, k) / scalen[strand.length - k - 1] * ed3(i,k); */
-  /* 	if(k < strand.length-1) { */
-  /* 	  Z(i,strand.length) += auPenalty(i, k) * Zb(i, k) * Z(k+2, strand.length) * ed3(i, k); */
-  /* 	} */
-  /*     } */
-  /*   } */
 
-  /*   for(index=0; pfc.ij[i+1][index] != 0 && pfc.ij[i+1][index] <= strand.length; ++index) { */
-  /*     k = pfc.ij[i+1][index]; */
-  /*     Z(i, strand.length) += auPenalty(i+1, k) * Zb(i+1, k) / scalen[strand.length - k] * ed5(i+1, k); */
-  /*     if(k < strand.length) { */
-  /* 	Z(i,strand.length) += auPenalty(i+1, k) * Zb(i+1, k) * Z(k+1, strand.length) * ed5(i+1, k); */
-  /* 	Z(i,strand.length) += auPenalty(i+1, k) * Zb(i+1, k) / scalen[strand.length - k - 1] * etstackm(i + 1, k); */
-  /* 	if(k < strand.length-1) { */
-  /* 	  Z(i,strand.length) += auPenalty(i+1, k) * Zb(i+1, k) * Z(k+2, strand.length) * etstackm(i + 1, k); */
-  /* 	} */
-  /*     } */
-  /*   } */
-  /* } */
+void fillExtendedZbZ1Z2(RNA* strand) {
+  int i,j,k,len = strand->length;
+
+  double** Zb = strand->partitionFunction->Zb;
+  double** Z2 = strand->partitionFunction->Z2;
+  double** Z1 = strand->partitionFunction->Z1;
+
+
+  double multiA = 1;//strand.energyModel.multiA;
+  double multiB = 1;//strand.energyModel.multiB;
+  double multiC = 1;//strand.energyModel.multiC;
+  double scale = strand->energyModel->scale[1];
+  double* bscale = strand->energyModel->bscale;
+
+  for(j = len; j < 2 * len; j++) {
+    for(i = len - 1; i > j - len; i++) {
+      double au = auPenalty(i, j - len);
+      if(i < len - 1 && j > len) {
+	Zb[i][j] = stackTerm(strand, i, j) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j);
+	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
+					  + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
+					  + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
+					  + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);
+	/* for(k = i + TURN + 3; k < len; k++) { */
+	/*   Zb[i][j] = multiA * multiC * au * Q(i+1, k-1) * Q1(k, j-1); */
+	/*   Zb[i][j] = multiA * multiB * multiC * au * ed5(strand, j - len, i) * Q(i + 1, k - 1) * Q1(k, j - 2); */
+	/*   Zb[i][j] = multiA * multiB * multiC * au * ed3(strand, j - len, i) * Q(i + 2, k - 1) * Q!(k, j - 1); */
+	/*   Zb[i][j] = multiA * multiB * multiB * multiC * etstackm(strand, j - len, i)  Q(i+2, k -1) * Q1(k, j - 2); */
+	/* } */
+	/* for(k = len + 1; k < j - TURN - 1; k++) { */
+	/*   Zb[i][j] = multiA * multiC * au * Q(i+1, k-1) * Q1(k - g_len, j - 1 - g_len); */
+	/*   Zb[i][j] = multiA * multiB * multiC * au * ed5(strand, j - len, i) * Q(i+1, k-1) * Q1(k - g_len, j - 2 - g_len); */
+	/*   if(i  < len - 1) { */
+	/*     Zb[i][j] = multiA * multiB * multiC * au * ed3(strand, j - len, i) * Q(i+2, k - 1) * Q1(k - g_len, j - 1 - g_len); */
+	/*     Zb[i][j] = multiA * multiB * multiB * multiC * au * etstackm(strand, j-g_len, i) * Q(i + 2, k-1) * Q1(k - len, j - 2 - g_len); */
+	/*   } */
+	/* } */
+      }
+      else
+	Zb[i][j] = 0.0;
+
+      Zb[i][j] += au * (Z[j-g_len - 1] + 1 / g_scalen[j-g_len -1]) / g_scalen[g_len - i] / g_scalen[2];
+      if(j > g_len + 1)  {
+	Zb[i][j] += au * ed5(strand, j - g_len, i) * (Q3(i + 1) + 1/g_scalen[j - g_len - 2]) / g_scalen[2];
+      }
+      if(i < g_len) {
+	Zb[i][j] += au * ed3(strand, j - g_len, i) * (Q3(i + 2) + 1/g_scalen[j-g_len-1]) / g_scalen[2];
+      }
+      if( j > g_len + 1 && i < g_len) {
+	Zb[i][j] += au * etstackm(strand, j - g_len, i) * (Q3(i + 2) + 1/g_scalen[j-g_len - 2]) / g_scalen[2];
+      }
+
+
+      Q1(i,j) = g_multi[2] * au * Zb[i][j];
+      if(i < g_len) {
+	Q1(i, j) += g_multi[1] * g_multi[2] * auPenalty(i + 1, j - g_len) * ed5(strand, i + 1, j - g_len) * Zb[i + 1][j];
+      }
+      if(j < g_len + 1) {
+	Q1(i, j) += g_multi[1] * g_multi[2] * auPenalty(i, j - 1 - g_len) * ed5(strand,i, j - 1 - g_len) * Zb[i][j - 1];
+      }
+      if( i < g_len && j > g_len + 1) {
+	Q1(i,j) += g_multi[1] * g_multi[2] * auPenalty(i + 1, j - 1 - g_len) * etstackm(strand, i + 1, j - 1 - g_len) * Zb[i+1][j-1];
+      } 
+      if(j > g_len + 1) {
+	Q1(i,j) += g_multi[1] * Q1(i, j - 1)/ g_scale;
+      }
+
+      Q(i,j) = Q1(i,j);
+      if(i < g_len) {
+	Q(i, j) += g_multi[1] * Q1(i + 1, j) / g_scale;
+      }
+      for(k = i+2, k <= g_len; k++) {
+	Q(i,j) += (Q(i,k-1) + g_bscalen[k-i]) * Q1(k, j);
+      }
+      for(k = g_len + 2; k < j - TURN; k++) {
+	Q(i, j) += Q(i, k - 1) * Q1(k - g_len, j - g_len);
+      }      
+    } 
+  }
+}
+
+
+void fillP(RNA* strand) {
+  int i, j;
+  for(i =  0; i < g_len; i++) {
+    for(j = i + TURN + 1; j < g_len; j++) {
+      if(Zb[i][j] == 0)
+	continue;
+      P(i,j) = Zb[i,j] * Zb[j][i + g_len] * g_scalen[2] / Z[g_len - 1];
+      P -= Q0(i,j) * hairpinTerm(strand, i , j) / Z[g_len - 1];
+      if(P(i,j) > 1.001 || P(i,j) < -.001) {
+	printf("Warning: P(%d,%d) = %g\n", i,j,P(i,j));
+      }
+    }
+  }
 }

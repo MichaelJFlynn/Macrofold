@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #define MAX_SEQUENCE_LENGTH 10000
 
@@ -24,7 +25,6 @@ RNA* allocateRNA(char* sequence) {
   initializeEnergyModel(newStrand);
   newStrand->partitionFunction = allocatePartitionFunction(newStrand->length);
   //printf("%g\n", newStrand->energyModel->stack[0][1][2][3]);
-
   return newStrand;
 }
 
