@@ -281,12 +281,12 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	if(k > j) continue;
 	Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * bscale[j-k];	  
 	if(k < j) { 
-	  Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1][j]; 
+	  Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len]; 
 	  Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k - len);
-	  Z2[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1][j];	  
+	  Z2[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len];	  
 	  if(k < j - 1) {
-	    Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k - len);
-	    Z2[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k - len);
+	    Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
+	    Z2[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
 	  }
 	}
       }
@@ -296,12 +296,12 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	if(k > j) continue;
 	Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
 	if(k < j) { 
-	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k - len);
+	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
 	  Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
-	  Z2[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k - len);
+	  Z2[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
 	  if(k < j - 1) {
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k - len);	  
-	    Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k - len);
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);	  
+	    Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);
 	  }
 	}
       }            
