@@ -192,70 +192,89 @@ void fillExtendedZbZ1Z2(RNA* strand) {
   double multiC = 1;//strand.energyModel.multiC;
   double scale = strand->energyModel->scale[1];
   double* bscale = strand->energyModel->bscale;
+  PairIterator* iterator;
+  PairIterator* iteratorPlus1;
 
-  for(j = len; j < 2 * len; j++) {
-    for(i = len - 1; i > j - len; i++) {
+  for(j = len + 1; j < 2 * len; j++) {
+    for(i = len - 2; i > j - len; i++) {
       double au = auPenalty(i, j - len);
-      if(i < len - 1 && j > len) {
-	Zb[i][j] = stackTerm(strand, i, j) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j);
-	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
+
+      // no hairpin term, not allowed in crossing 
+      Zb[i][j] = stackTerm(strand, i, j) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j);
+      Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
 					  + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
-					  + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
+					  + ed3(strand, j,i) * multiB * Z2[i+2][j-1]
 					  + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);
-	/* for(k = i + TURN + 3; k < len; k++) { */
-	/*   Zb[i][j] = multiA * multiC * au * Q(i+1, k-1) * Q1(k, j-1); */
-	/*   Zb[i][j] = multiA * multiB * multiC * au * ed5(strand, j - len, i) * Q(i + 1, k - 1) * Q1(k, j - 2); */
-	/*   Zb[i][j] = multiA * multiB * multiC * au * ed3(strand, j - len, i) * Q(i + 2, k - 1) * Q!(k, j - 1); */
-	/*   Zb[i][j] = multiA * multiB * multiB * multiC * etstackm(strand, j - len, i)  Q(i+2, k -1) * Q1(k, j - 2); */
-	/* } */
-	/* for(k = len + 1; k < j - TURN - 1; k++) { */
-	/*   Zb[i][j] = multiA * multiC * au * Q(i+1, k-1) * Q1(k - g_len, j - 1 - g_len); */
-	/*   Zb[i][j] = multiA * multiB * multiC * au * ed5(strand, j - len, i) * Q(i+1, k-1) * Q1(k - g_len, j - 2 - g_len); */
-	/*   if(i  < len - 1) { */
-	/*     Zb[i][j] = multiA * multiB * multiC * au * ed3(strand, j - len, i) * Q(i+2, k - 1) * Q1(k - g_len, j - 1 - g_len); */
-	/*     Zb[i][j] = multiA * multiB * multiB * multiC * au * etstackm(strand, j-g_len, i) * Q(i + 2, k-1) * Q1(k - len, j - 2 - g_len); */
-	/*   } */
-	/* } */
+      
+      Zb[i][j] += au * (Z[i+1][len - 1] + 1/strand->scale[len - 1 - i]) *
+	(Z[0][j - 1 - len] + 1/strand->scale[j-len])/strand->scale[2];
+      
+      if(j > len + 1)  {
+	Zb[i][j] += au * ed5(strand, j - len, i) * (Z[i + 1][len - 1] + 1/strand->scale[len - 1 - i]) * 
+	  (Z[0][j - 2 - len] + 1/strand->scale[j-len-1])/strand->scale[2]; 
       }
-      else
-	Zb[i][j] = 0.0;
-
-      Zb[i][j] += au * (Z[j-g_len - 1] + 1 / g_scalen[j-g_len -1]) / g_scalen[g_len - i] / g_scalen[2];
-      if(j > g_len + 1)  {
-	Zb[i][j] += au * ed5(strand, j - g_len, i) * (Q3(i + 1) + 1/g_scalen[j - g_len - 2]) / g_scalen[2];
+      if(i < len - 2) {
+	Zb[i][j] += au * ed3(strand, j - len, i) * (Zb[i + 2][len - 1] + 1/strand->scale[len - 2 - i]) * 
+	  (Zb[0][j - 1 - len] + 1/strand->scale[j - len])/strand->scale[2];
       }
-      if(i < g_len) {
-	Zb[i][j] += au * ed3(strand, j - g_len, i) * (Q3(i + 2) + 1/g_scalen[j-g_len-1]) / g_scalen[2];
-      }
-      if( j > g_len + 1 && i < g_len) {
-	Zb[i][j] += au * etstackm(strand, j - g_len, i) * (Q3(i + 2) + 1/g_scalen[j-g_len - 2]) / g_scalen[2];
+      if(i < len - 2 && j > len + 1 ) {
+	Zb[i][j] += au * etstackm(strand, j - len, i) * (Zb[i+2][len-1] + 1/strand->scale[len - 2 - i]) * 
+	  (Zb[0][j - 2 - len] + 1/strand->scale[j-len-1])/strand->scale[2];
       }
 
+      Z2[i][j] = multiB * Z2[i+1][j] / scale;
+      Z1[i][j] = multiB * Z1[i+1][j] / scale;	
 
-      Q1(i,j) = g_multi[2] * au * Zb[i][j];
-      if(i < g_len) {
-	Q1(i, j) += g_multi[1] * g_multi[2] * auPenalty(i + 1, j - g_len) * ed5(strand, i + 1, j - g_len) * Zb[i + 1][j];
-      }
-      if(j < g_len + 1) {
-	Q1(i, j) += g_multi[1] * g_multi[2] * auPenalty(i, j - 1 - g_len) * ed5(strand,i, j - 1 - g_len) * Zb[i][j - 1];
-      }
-      if( i < g_len && j > g_len + 1) {
-	Q1(i,j) += g_multi[1] * g_multi[2] * auPenalty(i + 1, j - 1 - g_len) * etstackm(strand, i + 1, j - 1 - g_len) * Zb[i+1][j-1];
-      } 
-      if(j > g_len + 1) {
-	Q1(i,j) += g_multi[1] * Q1(i, j - 1)/ g_scale;
+      // k is on the same side as i *********************************
+      // in this case Z1 is the same as Z2 because no completely empty
+      // sections are allowed between k and j since they are on
+      // different sides, this changes in the next section
+      iterator = strand->allowedPairs->ij[i];
+      for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
+	Z1[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]; 
+	Z2[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j];	  
+	Z1[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+	Z2[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
       }
 
-      Q(i,j) = Q1(i,j);
-      if(i < g_len) {
-	Q(i, j) += g_multi[1] * Q1(i + 1, j) / g_scale;
+      iteratorPlus1 = strand->allowedPairs->ij[i+1];
+      for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
+	Z1[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	Z2[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
+	Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
       }
-      for(k = i+2, k <= g_len; k++) {
-	Q(i,j) += (Q(i,k-1) + g_bscalen[k-i]) * Q1(k, j);
+      
+      // k is on the same side as j ********************************
+      iterator = strand->allowedPairs->ji[i];
+      for(k = start(iterator) + len; hasNext(iterator); k = next(iterator) + len) {
+	if(k > j) continue;
+	Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * bscale[j-k];	  
+	if(k < j) { 
+	  Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1][j]; 
+	  Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k - len);
+	  Z2[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1][j];	  
+	  if(k < j - 1) {
+	    Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k - len);
+	    Z2[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k - len);
+	  }
+	}
       }
-      for(k = g_len + 2; k < j - TURN; k++) {
-	Q(i, j) += Q(i, k - 1) * Q1(k - g_len, j - g_len);
-      }      
+      
+      iteratorPlus1 = strand->allowedPairs->ji[i+1];
+      for(k = start(iteratorPlus1) + len; hasNext(iteratorPlus1); k = next(iteratorPlus1) + len) {
+	if(k > j) continue;
+	Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
+	if(k < j) { 
+	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k - len);
+	  Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
+	  Z2[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k - len);
+	  if(k < j - 1) {
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k - len);	  
+	    Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k - len);
+	  }
+	}
+      }            
     } 
   }
 }
