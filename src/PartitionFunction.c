@@ -134,29 +134,30 @@ void fillZbZ1Z2(RNA* strand) {
   strand->partitionFunction->filledZbZ1Z2 = 1;
 }
 
-
+// this just fills the first row and last column
 void fillZ(RNA* strand) {
-  int j, k;
+  int i,j, k, len = strand->length;
+  double* scale = strand->scale;
   double* Z = strand->partitionFunction->Z;
   double** Zb = strand->partitionFunction->Zb;
   double* scale = strand->energyModel->scale;
   PairIterator* iterator;
   PairIterator* iteratorMinus1;
 
-  Z[0] = 0.0;
+  Z[0][0] = 0.0;
 
-  for (j = 1; j < strand->length; ++j) {
+  for (j = 1; j < len; ++j) {
 
-    Z[j] = Z[j - 1] / scale[1];
+    Z[0][j] = Z[0][j - 1] / scale[1];
     iterator = strand->allowedPairs->ji[j];
     for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
       if(k < 0) break;
-      Z[j] += auPenalty(k, j) * Zb[k][j] / scale[k - 1];
+      Z[0][j] += auPenalty(k, j) * Zb[k][j] / scale[k - 1];
       if(k > 1) {
-	Z[j] += auPenalty(k, j) * Z[k-1] * Zb[k][j];
-	Z[j] += auPenalty(k, j) * Zb[k][j] / scale[k-2] * ed5(strand, k, j);
+	Z[0][j] += auPenalty(k, j) * Z[0][k-1] * Zb[k][j];
+	Z[0][j] += auPenalty(k, j) * Zb[k][j] / scale[k-2] * ed5(strand, k, j);
 	if(k > 2) {
-	  Z[j] += auPenalty(k, j) * Z[k-2] * Zb[k][j] * ed5(strand, k, j);
+	  Z[0][j] += auPenalty(k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
 	}
       }
     }
@@ -164,15 +165,44 @@ void fillZ(RNA* strand) {
     iteratorMinus1 = strand->allowedPairs->ji[j-1];
     for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       if(k < 0) break;
-      Z[j] += auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
+      Z[0][j] += auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
       if(k > 1) {
-	Z[j] += auPenalty(k, j-1) * Z[k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
-	Z[j] += auPenalty(k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-2];
+	Z[0][j] += auPenalty(k, j-1) * Z[0][k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
+	Z[0][j] += auPenalty(k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-2];
 	if(k > 2) {
-	  Z[j] += auPenalty(k, j-1) * Z[k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
+	  Z[0][j] += auPenalty(k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
 	}
       }
     
+    }
+  }
+
+
+  for(i = len - 1; i >= 0; i--) {
+    Z[i][len] = Z[i + 1][len] / scale[1];
+    
+    iterator = strand->allowedPairs->ij[i];
+    for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
+      Z[i][len] += auPenalty(strand, i, k) * Zb[i][k]/scale[len - k];
+      if(k < len) {
+	Z[i][len] += auPenalty(strand, i, k) * Zb[i][k] * Z[k+1][len]; 
+	Z[i][len] += auPenalty(strand, i, k) * Zb[i][k] / scale[len - k - 1] * ed3(strand,i,k);
+	if(k < g_len-1) {
+	  Z[i][len] += auPenalty(strand, i, k) * Zb[i][k] * Z[k+2][len] * ed3(strand, i, k);
+	}
+      }
+    }
+    
+    iteratorMinus1 = strand->allowedPairs->ij[i+1];
+    for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
+      Z[i][len] += auPenalty(strand, i+1, k) * Zb[i+1][k] / scale[len - k] * ed5(strand, i+1, k);
+      if(k < g_len) {
+	Z[i][len] += auPenalty(strand, i+1, k) * Zb[i+1][k] * Z[k+1][len] * ed5(strand, i+1, k); 
+	Z[i][len] += auPenalty(strand, i+1, k) * Zb[i+1][k] / scale[len - k - 1] * etstackm(strand, i + 1, k);
+	if(k < g_len-1) {
+	  Z[i][len] += auPenalty(strand, i+1, k) * Zb[i+1][k] * Z[k+2][len] * etstackm(strand, i + 1, k);
+	}
+      }
     }
   }
   strand->partitionFunction->filledZ = 1;
