@@ -69,5 +69,5 @@ double getFreeEnergy(RNA* strand) {
   /* fputs("#T\t-RT ln Z\tZ\n", dGFile); */
   /* fprintf(dGFile, "%g\t%g\t%g\n", t, -RT * log(Q5(g_len) - Z0) - RT * g_len * log(g_scale), (Q5(g_len) - Z0) * g_scalen[g_len]); */
   double RT = .0019872 * strand->temperature;
-  return -RT * log(strand->partitionFunction->Z[strand->length - 1]) - RT * strand->length * log(strand->energyModel->scale[1]);
+  return -RT * log(strand->partitionFunction->Z[0][strand->length - 1]) - RT * strand->length * log(strand->energyModel->scale[1]);
 }
