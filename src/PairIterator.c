@@ -27,9 +27,8 @@ int next(PairIterator* pairIterator) {
 	   pairIterator->size);
     exit(1);
   }
-  int ret = pairIterator->pairs[pairIterator->iterator];
   pairIterator->iterator++;
-  return ret;
+  return pairIterator->pairs[pairIterator->iterator];
 }
 
 int start(PairIterator* pairIterator) {
@@ -42,6 +41,7 @@ void add(PairIterator* pairIterator, int element) {
     printf("Out of bounds add(pairIterator, i), size: %d, maxSize: %d\n", 
 	   pairIterator->size,
 	   pairIterator->maxSize);
+    exit(1);
   }
   pairIterator->pairs[pairIterator->size] = element;
   pairIterator->size++;

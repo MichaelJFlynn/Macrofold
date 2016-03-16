@@ -1,9 +1,12 @@
+#include "RNA.h"
 #include "AllowedPairs.h"
 #include "PairIterator.h"
 #include "EnergyFunctions.h" // for TURN definition
 #include <stdlib.h>
+#include <stdio.h>
 
-AllowedPairs* fromAllPairs(int length) {
+AllowedPairs* fromAllPairs(RNA* strand) {
+  int length = strand->length;
   int i,j;
   AllowedPairs* ap = (AllowedPairs*) malloc(sizeof(AllowedPairs));
   ap->size = length;
@@ -18,13 +21,17 @@ AllowedPairs* fromAllPairs(int length) {
 
   for(i = 0; i < length;  i++) {
     for(j =i+TURN; j < length; j++) {
-      add(ap->ij[i], j);
+      if(isCannonical(strand, i, j)) {
+	add(ap->ij[i], j);
+      }
     }
   }
 
   for(j = length - 1; j >= 0;  j--) {
     for(i =j-TURN; i >= 0; i--) {
-      add(ap->ji[j], i);
+      if(isCannonical(strand, i, j)) {
+	add(ap->ji[j], i);
+      }
     }
   }
   return ap;
@@ -37,4 +44,29 @@ void freeAllowedPairs(AllowedPairs* allowedPairs) {
     freePairIterator(allowedPairs->ji[i]);
   }
   free(allowedPairs);
+}
+
+void printAllowedPairs(AllowedPairs* ap) {
+  int i, j, k;
+  PairIterator* p;
+
+  printf("ij ##################################\n");
+  for(i = 0; i < ap->size; i++) {
+    p = ap->ij[i];
+    printf("%d: ", i);
+    for(k = start(p); hasNext(p); k = next(p)) {
+      printf("%d ", k);
+    }
+    printf("\n"); 
+  }
+
+  printf("ji ##################################\n");
+  for(j = ap->size - 1; j >= 0; j--) {
+    p = ap->ji[j];
+    printf("%d: ", j);
+    for(k = start(p); hasNext(p); k = next(p)) {
+      printf("%d ", k);
+    }
+    printf("\n"); 
+  }
 }

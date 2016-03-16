@@ -4,6 +4,9 @@
 struct PairIterator;
 typedef struct PairIterator PairIterator;
 
+struct RNA;
+typedef struct RNA RNA;
+
 typedef struct AllowedPairs {
   PairIterator** ij;
   PairIterator** ji;
@@ -12,6 +15,7 @@ typedef struct AllowedPairs {
 } AllowedPairs;
 
 void freeAllowedPairs(AllowedPairs* allowPairs);
-AllowedPairs* fromAllPairs(int length);
+AllowedPairs* fromAllPairs(RNA* strand);
+void printAllowedPairs(AllowedPairs* ap);
 
 #endif

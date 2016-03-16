@@ -1,4 +1,4 @@
-// Written by Mike Flynn, 2015-2016
+ // Written by Mike Flynn, 2015-2016
 
 #include "EnergyFunctions.h"
 #include "RNA.h"
@@ -37,15 +37,19 @@ PartitionFunction* allocatePartitionFunction(int length) {
 void freePartitionFunction(RNA* strand) {
   int i;  
   PartitionFunction* ret = strand->partitionFunction;
-  for(i = 0; i < strand->length; i++) {
+  for(i = 0; i < 2*strand->length; i++) {
+    free(ret->Z[i]);
     free(ret->Zb[i]);
     free(ret->Z1[i]);
     free(ret->Z2[i]);
+    if(i < strand->length)
+      free(ret->P[i]);
   }
   free(ret->Z);
   free(ret->Zb);
   free(ret->Z1);
   free(ret->Z2);
+  free(ret->P);
   free(ret);
 }
 
@@ -90,13 +94,15 @@ void fillZbZ1Z2(RNA* strand) {
 	PairIterator* iterator = strand->allowedPairs->ij[i];
 	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
 
-
-	Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
-	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
-					  + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
-					  + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
-					  + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);
-	
+	if(isCannonical(strand, i, j)) {
+	  Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
+	  Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
+					      + ed5(strand, j, i) * multiB *Z2[i+1][j-2]
+					      + ed3(strand, j,i) * multiB * Z2[i+2][j-1] 
+					      + etstackm(strand, j,i) * multiB * multiB * Z2[i+2][j-2]);	
+	} else {
+	  Zb[i][j] = 0;
+	}
 
 	Z2[i][j] = multiB * Z2[i+1][j] / scale;
 	Z1[i][j] = multiB * Z1[i+1][j] / scale;	
@@ -192,7 +198,7 @@ void fillZ(RNA* strand) {
     }
     
     iteratorMinus1 = strand->allowedPairs->ij[i+1];
-    for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
+    for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] / scale[len-1 - k] * ed5(strand, i+1, k);
       if(k < len-1) {
 	Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] * Z[k+1][len-1] * ed5(strand, i+1, k); 
@@ -229,31 +235,33 @@ void fillExtendedZbZ1Z2(RNA* strand) {
     for(i = len - 2; i > j - len; i--) {
       double au = auPenalty(i, j - len);
       // no hairpin term, not allowed in crossing 
-      Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j - len);
-
-      Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1]
-      					  + ed5(strand, j - len, i) * multiB *Z2[i+1][j-2]
-      					  + ed3(strand, j - len,i) * multiB * Z2[i+2][j-1]
-      					  + etstackm(strand, j - len,i) * multiB * multiB * Z2[i+2][j-2]);
-
-
-      Zb[i][j] += au * (Z[i+1][len - 1] + 1/scale[len - 1 - i]) *
-	(Z[0][j - 1 - len] + 1/scale[j-len])/scale[2];
-      
-      if(j > len + 1)  {
-	Zb[i][j] += au * ed5(strand, j - len, i) * (Z[i + 1][len - 1] + 1/scale[len - 1 - i]) * 
-	  (Z[0][j - 2 - len] + 1/scale[j-len-1])/scale[2]; 
+      if(isCannonical(strand, i, j - len)) {
+	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j - len);
+	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1]
+					    + ed5(strand, j - len, i) * multiB *Z2[i+1][j-2]
+					    + ed3(strand, j - len,i) * multiB * Z2[i+2][j-1]
+					    + etstackm(strand, j - len,i) * multiB * multiB * Z2[i+2][j-2]);
+	
+	
+	Zb[i][j] += au * (Z[i+1][len - 1] + 1/scale[len - 1 - i]) *
+	  (Z[0][j - 1 - len] + 1/scale[j-len])/scale[2];
+	
+	if(j > len + 1)  {
+	  Zb[i][j] += au * ed5(strand, j - len, i) * (Z[i + 1][len - 1] + 1/scale[len - 1 - i]) * 
+	    (Z[0][j - 2 - len] + 1/scale[j-len-1])/scale[2]; 
+	}
+	if(i < len - 2) {
+	  Zb[i][j] += au * ed3(strand, j - len, i) * (Zb[i + 2][len - 1] + 1/scale[len - 2 - i]) * 
+	    (Zb[0][j - 1 - len] + 1/scale[j - len])/scale[2];
+	}
+	if(i < len - 2 && j > len + 1 ) {
+	  Zb[i][j] += au * etstackm(strand, j - len, i) * (Zb[i+2][len-1] + 1/scale[len - 2 - i]) * 
+	    (Zb[0][j - 2 - len] + 1/scale[j-len-1])/scale[2];
+	}
+      } else {
+	Zb[i][j] = 0;
       }
-      if(i < len - 2) {
-	Zb[i][j] += au * ed3(strand, j - len, i) * (Zb[i + 2][len - 1] + 1/scale[len - 2 - i]) * 
-	  (Zb[0][j - 1 - len] + 1/scale[j - len])/scale[2];
-      }
-      if(i < len - 2 && j > len + 1 ) {
-	Zb[i][j] += au * etstackm(strand, j - len, i) * (Zb[i+2][len-1] + 1/scale[len - 2 - i]) * 
-	  (Zb[0][j - 2 - len] + 1/scale[j-len-1])/scale[2];
-      }
-
-
+	
       Z2[i][j] = multiB * Z2[i+1][j] / scale[0];
       Z1[i][j] = multiB * Z1[i+1][j] / scale[0];	
 

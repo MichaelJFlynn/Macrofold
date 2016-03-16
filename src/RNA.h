@@ -26,4 +26,5 @@ RNA* allocateRNA(char* sequence);
 RNA* readSequenceFile(char* filename);
 void freeRNA(RNA* strand);
 double getFreeEnergy(RNA* strand);
+int isCannonical(RNA* strand, int i, int j);
 #endif

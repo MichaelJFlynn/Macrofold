@@ -21,7 +21,7 @@ RNA* allocateRNA(char* sequence) {
   }
 
   newStrand->temperature = 37 + 273; // kelvin
-  newStrand->allowedPairs = fromAllPairs(newStrand->length);
+  newStrand->allowedPairs = fromAllPairs(newStrand);
   initializeEnergyModel(newStrand);
   newStrand->partitionFunction = allocatePartitionFunction(newStrand->length);
   //printf("%g\n", newStrand->energyModel->stack[0][1][2][3]);
@@ -61,6 +61,29 @@ RNA* readSequenceFile(char* filename) {
   return allocateRNA(sequence);
 }
 
+int isCannonical(RNA* strand, int i, int j) { 
+  if(i < 0 || j < 0 || i >= strand->length || j >= strand->length) {
+    printf("isCannonical error: out of bounds (%d,%d)\n", i, j);
+    exit(1);
+  }
+  char ic = strand->sequence[i];
+  char jc = strand->sequence[j];
+  if(ic == 'A' && jc == 'U') {
+    return 1;
+  } else if(ic == 'U' && jc == 'A') {
+    return 1;
+  } else if(ic == 'G' && jc == 'C') {
+    return 1;
+  } else if(ic == 'C' && jc == 'G') {
+    return 1;
+  } else if(ic == 'G' && jc == 'U') {
+    return 1;
+  } else if(ic == 'U' && jc == 'G') {
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
 /* Outputs the change in energy from the completely unfolded state to the folded state
 
@@ -71,3 +94,5 @@ double getFreeEnergy(RNA* strand) {
   double RT = .0019872 * strand->temperature;
   return -RT * log(strand->partitionFunction->Z[0][strand->length - 1]) - RT * strand->length * log(strand->energyModel->scale[1]);
 }
+
+
