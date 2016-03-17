@@ -236,7 +236,7 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       double au = auPenalty(i, j - len);
       // no hairpin term, not allowed in crossing 
       if(isCannonical(strand, i, j - len)) {
-	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTerm(strand, i, j - len);
+	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTermPeriodic(strand, i, j - len);
 	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1]
 					    + ed5(strand, j - len, i) * multiB *Z2[i+1][j-2]
 					    + ed3(strand, j - len,i) * multiB * Z2[i+2][j-1]

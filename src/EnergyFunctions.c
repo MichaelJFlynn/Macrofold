@@ -11,6 +11,7 @@
 #define MAXLOOP 10
 #define auPenalty(i,j) 1
 
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 double hairpinTerm(RNA* strand, int i, int j)
 {
@@ -104,12 +105,30 @@ double bulgeInternalTerm(RNA* strand, int i, int j)
     for (ii = i + 1; ii < j - d && ii <= strand->length; ++ii)
       {
 	jj = d + ii;
-	if (Zb[ii][jj] != 0.0)
+	if(isCannonical(strand, ii, jj))
 	  energy += ebi(strand, i, j, ii, jj) * Zb[ii][jj];
       }
 
   return energy;
 }
+
+
+double bulgeInternalTermPeriodic(RNA* strand, int i, int j)
+{
+  int d, ii, jj;
+  double energy = 0.0;
+  double** Zb = strand->partitionFunction->Zb;
+  for (d = j - i - 3; d >= 1 && d >= j - i - 2 - MAXLOOP; --d)
+    for (ii = MAX(i + 1, strand->length + 1 - d); ii < j - d && ii <= strand->length; ++ii)
+      {
+	jj = d + ii;
+	if (isCannonical(strand, ii, jj - strand->length))
+	  energy += ebi(strand, jj - strand->length, ii, j - strand->length, i) * Zb[ii][jj];
+      }
+
+  return energy;
+}
+
 
 double stackTerm(RNA* strand, int i, int j)
 {
