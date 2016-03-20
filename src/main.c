@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
 
   MacrofoldConsole* mc =  allocateMacrofoldConsole();
   startConsole(mc);
+
+
   free(mc);
   /* scanf("%s", scan_string); */
   /* printf("You entered: %s adsf\n", scan_string); */
