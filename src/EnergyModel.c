@@ -70,10 +70,12 @@ void loadStack(RNA* strand) {
   DataFile* stackData = readCSV("../data/stack.csv");
   int i;
 
+  // ref'd at:
+  // 5pOuter - 3pouter - 5pInner - 3pInner
   for(i = 0; i < stackData->nrow; i++) {
       strand->energyModel->stack[baseMap(get(stackData,i,0))]
-	[baseMap(get(stackData,i,1))]
-	[baseMap(get(stackData,i,2))]
+	[baseMap(get(stackData,i,1))] 
+	[baseMap(get(stackData,i,2))] 
 	[baseMap(get(stackData,i,3))] = exp(-atof(get(stackData,i,4)) / (R * strand->temperature)) / strand->energyModel->scale[2];
   }  
   freeDataFile(stackData);

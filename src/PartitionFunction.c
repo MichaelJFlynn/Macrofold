@@ -236,16 +236,15 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       double au = auPenalty(i, j - len);
       // no hairpin term, not allowed in crossing 
       if(isCannonical(strand, i, j - len)) {
+
 	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTermPeriodic(strand, i, j - len);
 	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1]
 					    + ed5(strand, j - len, i) * multiB *Z2[i+1][j-2]
 					    + ed3(strand, j - len,i) * multiB * Z2[i+2][j-1]
 					    + etstackm(strand, j - len,i) * multiB * multiB * Z2[i+2][j-2]);
 	
-	
 	Zb[i][j] += au * (Z[i+1][len - 1] + 1/scale[len - 1 - i]) *
 	  (Z[0][j - 1 - len] + 1/scale[j-len])/scale[2];
-	
 	if(j > len + 1)  {
 	  Zb[i][j] += au * ed5(strand, j - len, i) * (Z[i + 1][len - 1] + 1/scale[len - 1 - i]) * 
 	    (Z[0][j - 2 - len] + 1/scale[j-len-1])/scale[2]; 
@@ -258,6 +257,7 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	  Zb[i][j] += au * etstackm(strand, j - len, i) * (Zb[i+2][len-1] + 1/scale[len - 2 - i]) * 
 	    (Zb[0][j - 2 - len] + 1/scale[j-len-1])/scale[2];
 	}
+
       } else {
 	Zb[i][j] = 0;
       }

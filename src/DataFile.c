@@ -99,6 +99,11 @@ DataFile* constructDataFile(Line** lines, int nrow) {
   return df;
 }
 
+void freeLine(Line* line) {
+  free(line->tokens);
+  free(line);
+}
+
 void freeDataFile(DataFile* dataFile) {
   int i, j;
 

@@ -16,7 +16,7 @@ typedef struct {
 DataFile* readCSV(char* filepath);
 
 char* get(DataFile* data, int i, int j);
-
+Line* parseLine(char* string, char* tokens);
 /* inline int nrow(DataFile data) { */
 /*   return data.nrow; */
 /* };  */
@@ -36,5 +36,5 @@ char* get(DataFile* data, int i, int j);
 DataFile* constructDataFile(Line** lineHolder, int nrow);
 
 void freeDataFile(DataFile* data);
-
+void freeLine(Line* line);
 #endif

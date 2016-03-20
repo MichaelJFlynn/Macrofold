@@ -100,7 +100,6 @@ def convertDangles():
     dangle5 = open("data/dangle5.csv", 'w')
     dangle3 = open("data/dangle3.csv", 'w')
 
-
     dangle5.write("5primeBase,3primeBase,DangleBase,Energy\n")
     dangle3.write("5primeBase,3primeBase,DangleBase,Energy\n")
     skip = 10

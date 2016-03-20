@@ -142,7 +142,7 @@ double stackTerm(RNA* strand, int i, int j)
   if (j > length)
     j -= length;
 
-  return strand->energyModel->stack[nSeq[i]][nSeq[j]][nSeq[i + 1]][nSeq[j - 1]];
+  return strand->energyModel->stack[nSeq[i]][nSeq[i + 1]][nSeq[j - 1]][nSeq[j]];
 }
 
 double etstackm(RNA* strand, int i, int j)
