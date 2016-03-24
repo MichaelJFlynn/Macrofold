@@ -7,8 +7,39 @@
 #include "PartitionFunction.h"
 #include "AllowedPairs.h"
 #include "MacrofoldConsole.h"
+#include "StochasticSamples.h"
 #include <stdio.h>
 #include <math.h>
+
+/* 
+
+Notes:
+- new scaling factor (for now .34 kcal/mol*base / kT)
+- markham: 2d array in 1d array?
+- Zuker: markham parraellized
+
+
+Official list of tests:
+- compare free energy to Unafold
+- compare P[i][j] to unafold
+- simple structures (small hairpins) does it output hairpin
+- compare longer sequences for multibranch rules
+- compare to cannonical RNA sequences:
+---- TRNAs, 5s Ribosomal RNA -> RNAStructure examples dir, 09wkj Nestor sequences dir
+
+
+1: implement AU
+2: implement tstackh
+3: implement gscale
+4: implement multiloop energies (can find in nndb)
+5: unthorough verify
+5.5?: if 1x2 mismatches differ: implement 1x2 mismatches and 2x2 mismatches
+5: timing tests, random sequence stuff, go by 100s or 1000, out to 4000
+6: dynamic thresholding
+7: test again?
+8: Get paper together - what do we need?
+9: thorough verify against unafold, test above
+ */
 
 
 int main(int argc, char* argv[]) {
@@ -22,16 +53,27 @@ int main(int argc, char* argv[]) {
 
   //printf("%g\n", getFreeEnergy(strand));
 
-  MacrofoldConsole* mc =  allocateMacrofoldConsole();
-  startConsole(mc);
+  /* MacrofoldConsole* mc =  allocateMacrofoldConsole(); */
+  /* startConsole(mc); */
 
 
-  free(mc);
+  sample(strand, 1000);
+  int i, j;
+  for(i = 0; i < 1000; i++) {
+    for(j = 0; j < strand->length; j++) {
+      printf("%d ", strand->samples->structures[i][j]);
+    }
+    printf("\n");    
+  }
+
+
+
+  /* free(mc); */
   /* scanf("%s", scan_string); */
   /* printf("You entered: %s adsf\n", scan_string); */
 
-  //int i,j;
-  //double sum = 0;
+  /* int i,j; */
+  /* double sum = 0; */
   /* for(i = 0; i < strand->length; i++) { */
   /*   printf("%11d\t", i); */
   /* } */
@@ -39,7 +81,7 @@ int main(int argc, char* argv[]) {
   /* for(i = 0; i < strand->length; i++) { */
   /*   for(j = 0; j < strand->length; j++) { */
   /*     if(i < j) { */
-  /* 	printf("%.4e\t", strand->partitionFunction->Zb[i][j]); */
+  /* 	printf("%.4e\t", strand->partitionFunction->P[i][j]); */
   /*     } else { */
   /* 	printf("           \t"); */
   /*     } */
