@@ -11,6 +11,9 @@ typedef struct AllowedPairs AllowedPairs;
 struct PartitionFunction;
 typedef struct PartitionFunction PartitionFunction;
 
+struct StochasticSamples;
+typedef struct StochasticSamples StochasticSamples;
+
 typedef struct RNA {
   int length;
   char* sequence;
@@ -20,6 +23,7 @@ typedef struct RNA {
   EnergyModel* energyModel;
   PartitionFunction* partitionFunction;
   AllowedPairs* allowedPairs;
+  StochasticSamples* samples;
 } RNA;
 
 RNA* allocateRNA(char* sequence);

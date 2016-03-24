@@ -14,7 +14,7 @@ void startConsole(MacrofoldConsole* mc) {
 	 "/ \\/ \\/    \\( (__  )   /(  O )) _)(  O )/ (_/\\ ) D (\n"
 	 "\\_)(_/\\_/\\_/ \\___)(__\\_) \\__/(__)  \\__/ \\____/(____/\n" 
 	 "\nWelcome to the Macrofold Console!\n"
-	 "Written by Mike Flynn <mflynn210@gmail.com> 2015-2016\n"
+	 "Written by Michael J. Flynn <mflynn210@gmail.com> 2015-2016\n"
 	 "Advisor: Daniel P. Aalberts <aalberts@williams.edu>\n"
 	 "\nType 'help' for a list of commands.\n\n"
 	 );

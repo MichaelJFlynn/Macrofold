@@ -24,6 +24,7 @@ RNA* allocateRNA(char* sequence) {
   newStrand->allowedPairs = fromAllPairs(newStrand);
   initializeEnergyModel(newStrand);
   newStrand->partitionFunction = allocatePartitionFunction(newStrand->length);
+  newStrand->samples = 0;
   //printf("%g\n", newStrand->energyModel->stack[0][1][2][3]);
   return newStrand;
 }
