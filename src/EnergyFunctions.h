@@ -2,7 +2,7 @@
 #define ENERGYFUNCTIONS_H
 
 #define TURN 3
-
+#define MAXLOOP 10
 // forward declaration of RNA, for the compiler
 struct RNA;
 typedef struct RNA RNA;

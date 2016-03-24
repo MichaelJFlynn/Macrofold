@@ -8,7 +8,6 @@
 
 // used to be g_misc[12]
 #define HAIRPINBASE 37
-#define MAXLOOP 10
 #define auPenalty(i,j) 1
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
