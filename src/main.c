@@ -46,10 +46,8 @@ int main(int argc, char* argv[]) {
   // tests 
   RNA* strand = readSequenceFile("sample.seq");
 
-  fillZbZ1Z2(strand);
-  fillZ(strand);
-  fillExtendedZbZ1Z2(strand);
-  fillP(strand);
+  computePartitionFunction(strand);
+
 
   //printf("%g\n", getFreeEnergy(strand));
 

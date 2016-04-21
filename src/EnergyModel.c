@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-#define SCALE_PARAMETER 1
+#define SCALE_PARAMETER 1.86762
 
 const double R = .0019872;
 

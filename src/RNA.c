@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 
 #define MAX_SEQUENCE_LENGTH 10000
@@ -38,6 +39,13 @@ void freeRNA(RNA* strand) {
   free(strand);
 }
 
+void computePartitionFunction(RNA* strand) {
+  fillZbZ1Z2(strand);
+  fillZ(strand);
+  fillExtendedZbZ1Z2(strand);
+  fillP(strand);
+}
+
 RNA* readSequenceFile(char* filename) { 
   FILE* fp = fopen(filename, "r");
   char* sequence;
@@ -59,6 +67,14 @@ RNA* readSequenceFile(char* filename) {
 
   sequence = (char*) calloc(length + 1, sizeof(char));
   memcpy(sequence, seqBuffer, length);
+
+  // remove trailing white-space
+  int i = length - 1;
+  while(isspace(sequence[i])) {
+    sequence[i] = 0;
+    i--;
+  }
+
   return allocateRNA(sequence);
 }
 

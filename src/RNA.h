@@ -27,6 +27,7 @@ typedef struct RNA {
 } RNA;
 
 RNA* allocateRNA(char* sequence);
+void computePartitionFunction(RNA* strand);
 RNA* readSequenceFile(char* filename);
 void freeRNA(RNA* strand);
 double getFreeEnergy(RNA* strand);
