@@ -27,14 +27,30 @@ int baseMap(char* letter) {
 }
 
 void initializeEnergyModel(RNA* strand) {
-  int i;
+  int i,j;
 
   strand->energyModel = calloc(1, sizeof(EnergyModel));
 
-  strand->energyModel->multiA = 1;
-  strand->energyModel->multiB = 1;
-  strand->energyModel->multiC = 1;
-  
+  strand->energyModel->multiA = exp(-10.1 / (R * strand->temperature)) ;
+  strand->energyModel->multiB = exp(0.3 / (R * strand->temperature));
+  strand->energyModel->multiC = exp(0.3 / (R * strand->temperature));
+
+  for(i = 0; i < 4; i++) {
+    for(j = 0; j < 4; j++) {
+      strand->energyModel->auPenalty[i][j] = 1;
+    }
+  }
+  strand->energyModel->auPenalty[baseMap("A")][baseMap("U")] =  
+    exp(-0.65 / (R * strand->temperature));
+  strand->energyModel->auPenalty[baseMap("U")][baseMap("A")] =  
+    exp(-0.65 / (R * strand->temperature));
+  strand->energyModel->auPenalty[baseMap("G")][baseMap("A")] =  
+    exp(1.1 / (R * strand->temperature));
+  strand->energyModel->auPenalty[baseMap("A")][baseMap("G")] =  
+    exp(1.1 / (R * strand->temperature));
+  strand->energyModel->auPenalty[baseMap("U")][baseMap("U")] =  
+    exp(0.7 / (R * strand->temperature));
+
   strand->energyModel->scale = (double*) malloc((strand->length + 1) * sizeof(double));
   strand->energyModel->scale[0] = 1;
   for(i = 1; i <= strand->length; i++) {

@@ -7,7 +7,6 @@
 #include "PartitionFunction.h"
 #include <stdlib.h>
 
-#define auPenalty(i, j) 1
 #define TRUE 1
 #define FALSE 0
 
@@ -59,7 +58,10 @@ void freeStochasticSamples(StochasticSamples* samples) {
 
 void sample(RNA* strand, int samples) {
   int i, j, k, sample;
-  double rnd, multiA = 1, multiB = 1, multiC = 1;
+  double rnd, 
+    multiA = strand->energyModel->multiA, 
+    multiB = strand->energyModel->multiB, 
+    multiC = strand->energyModel->multiC;
   bool found = FALSE;
   struct stackNode *stack, *top;
   double **Z = strand->partitionFunction->Z, 
@@ -69,7 +71,11 @@ void sample(RNA* strand, int samples) {
   double* scale = strand->energyModel->scale; 
   int len = strand->length;
   PairIterator* iteratorPlus1, *iterator, *iteratorMinus1;
-  
+
+  if(strand->samples) {
+    freeStochasticSamples(strand->samples);
+  }
+
   strand->samples = allocateStochasticSamples(strand, samples);
 
   for(sample =0; sample < samples; sample++) {
@@ -88,45 +94,45 @@ void sample(RNA* strand, int samples) {
       
       iterator = strand->allowedPairs->ji[j];
       for(k = start(iterator); hasNext(iterator); k = next(iterator)) {      
-	if (rnd <= auPenalty(k, j) * Zb[k][j] / scale[k]) { 
+	if (rnd <= auPenalty(strand, k, j) * Zb[k][j] / scale[k]) { 
 	  push(&stack, k, j, 0);
 	  j = 0;
 	  found = TRUE;
 	  break;
 	}
 	else
-	  rnd -= auPenalty(k, j) * Zb[k][j] / scale[k];
+	  rnd -= auPenalty(strand, k, j) * Zb[k][j] / scale[k];
 	
 	if(k > 0) {
-	  if(rnd <= auPenalty(k, j) * Z[0][k-1] * Zb[k][j]) {
+	  if(rnd <= auPenalty(strand, k, j) * Z[0][k-1] * Zb[k][j]) {
 	    push(&stack, k, j, 0);
 	    j = k-1;
 	    found = TRUE; 
 	    break;
 	  } else 
-	    rnd -= auPenalty(k, j) * Z[0][k-1] * Zb[k][j];
+	    rnd -= auPenalty(strand, k, j) * Z[0][k-1] * Zb[k][j];
 	}
 	
 	if(k > 1) {
-	  if(rnd <= auPenalty(k, j) * Zb[k][j]/ scale[k-1] * ed5(strand, k, j)) {
+	  if(rnd <= auPenalty(strand, k, j) * Zb[k][j]/ scale[k-1] * ed5(strand, k, j)) {
 	    //setDangle5(k, upst, dnst);
 	    push(&stack, k, j, 0);
 	    j = k - 2;
 	    found = TRUE;
 	    break;
 	  } else 
-	    rnd -= auPenalty(k, j) * Zb[k][j] / scale[k-1] * ed5(strand, k, j);
+	    rnd -= auPenalty(strand, k, j) * Zb[k][j] / scale[k-1] * ed5(strand, k, j);
 	}
 	
 	if(k > 2) {
-	  if(rnd <= auPenalty(k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j)) {
+	  if(rnd <= auPenalty(strand, k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j)) {
 	    //setDangle5(k, upst, dnst);
 	    push(&stack, k, j, 0);
 	    j = k-2;
 	    found = TRUE;
 	    break;
 	  } else 
-	    rnd -= auPenalty(k,j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
+	    rnd -= auPenalty(strand, k,j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
 	}
       } // j pairs for loop
       
@@ -134,42 +140,42 @@ void sample(RNA* strand, int samples) {
       if(!found) {
 	for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1))  {      
 	  
-	  if(rnd <= auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k]) {
+	  if(rnd <= auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k]) {
 	    //setDangle3(j-1, upst, dnst);
 	    push(&stack, k, j-1, 0);
 	    j = 0;
 	    break;
 	  } else
-	    rnd -= auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k];
+	    rnd -= auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k];
 	  
 	  if(k > 1) {
-	    if(rnd <= auPenalty(k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1)) {
+	    if(rnd <= auPenalty(strand, k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1)) {
 	      //setDangle3(j-1, upst, dnst);
 	      push(&stack, k, j-1, 0);
 	      j = k - 1;
 	      break;
 	    } else 
-	      rnd -= auPenalty(k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1);
+	      rnd -= auPenalty(strand, k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1);
 	  }
 	  
 	  if(k > 1) {
-	    if(rnd <= auPenalty(k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1]) {
+	    if(rnd <= auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1]) {
 	      //setDangle5(k, upst, dnst);
 	      //setDangle3(j-1, upst, dnst);
 	      push(&stack, k, j-1, 0);
 	      j = 0;
 	      break;
 	    } else
-	      rnd -= auPenalty(k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1];
+	      rnd -= auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1];
 	  }
 	  
 	  if(k > 2) {
-	    if(rnd <= auPenalty(k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2)) {
+	    if(rnd <= auPenalty(strand, k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2)) {
 	      //setDangle5(k, upst, dnst);
 	      //setDangle3(j-1, upst, dnst);
 	      push(&stack, k, j-1, 0);
 	    } else 
-	      rnd -= auPenalty(k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2);
+	      rnd -= auPenalty(strand, k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2);
 	  }
 	} // j-1 pairs for loop
       }
@@ -210,7 +216,7 @@ void sample(RNA* strand, int samples) {
 	      {
 		// these are the multiloop terms
 		rnd -= hairpinTerm(strand, i, j) + stackTerm(strand, i, j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);
-		rnd /= multiA * multiC * auPenalty(i, j);
+		rnd /= multiA * multiC * auPenalty(strand, i, j);
 		if(rnd <= Z2[i+1][j-1]) {
 		  push(&stack, i+1, j-1, 2);
 		  found = TRUE;
@@ -265,44 +271,44 @@ void sample(RNA* strand, int samples) {
 	    iterator = strand->allowedPairs->ij[i];
 	    for(k = start(iterator); hasNext(iterator); k = next(iterator)) { 
 	      
-	      if(rnd <= multiC * auPenalty(i, k) * Zb[i][k] * scale[j-k]) {
+	      if(rnd <= multiC * auPenalty(strand, i, k) * Zb[i][k] * scale[j-k]) {
 		push(&stack, i, k, 0);
 		found = TRUE;
 		break;
 	      } else 
-		rnd -= multiC * auPenalty(i, k) * Zb[i][k] * scale[j-k]; 
+		rnd -= multiC * auPenalty(strand, i, k) * Zb[i][k] * scale[j-k]; 
 	      
 	      if(k < j) {
-		if(rnd <= multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]) {
+		if(rnd <= multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]) {
 		  push(&stack, i, k, 0);
 		  push(&stack, k+1, j, 1);
 		  found = TRUE;
 		  break; 
 		} else 
-		  rnd -= multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]; 
+		  rnd -= multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]; 
 	      }
 	      
 	      
 	      if(k < j) {
-		if(multiC * multiB * auPenalty(i, k) * Zb[i][k] * scale[j-k - 1] * ed3(strand, i, k)){
+		if(multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * scale[j-k - 1] * ed3(strand, i, k)){
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i, k, 0);
 		  found = TRUE;
 		  break; 
 		} else
-		  rnd -= multiC * multiB * auPenalty(i, k) * Zb[i][k] * scale[j-k - 1] * ed3(strand, i, k);
+		  rnd -= multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * scale[j-k - 1] * ed3(strand, i, k);
 	      }
 	      
 	      
 	      if(k < j-1) {
-		if(rnd <= multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k)) {
+		if(rnd <= multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k)) {
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i, k, 0);
 		  push(&stack, k+2, j, 1);
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+		  rnd -= multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
 	      }
 	      
 	    }
@@ -310,39 +316,39 @@ void sample(RNA* strand, int samples) {
 	    iteratorPlus1 = strand->allowedPairs->ij[i + 1];
 	    for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
 	      
-	      if(rnd <= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * scale[j-k] * ed5(strand, i+1, k)){
+	      if(rnd <= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * scale[j-k] * ed5(strand, i+1, k)){
 		//setDangle5(i+1, upst, dnst);
 		push(&stack, i+1, k, 0);
 		found = TRUE;
 		break;
 	      } else 
-		rnd -= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * scale[j-k] * ed5(strand, i+1, k);
+		rnd -= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * scale[j-k] * ed5(strand, i+1, k);
 	      
 	      if(k < j) {
-		if (rnd <= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k)) {
+		if (rnd <= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k)) {
 		  //setDangle5(i+1, upst, dnst);
 		  push(&stack, i+1, k, 0);
 		  push(&stack, k+1, j, 1);
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+		  rnd -= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
 	      } 
 	      
 	      
 	      if(k < j) {
-		if(rnd <= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * scale[j-k - 1] * etstackm(strand, i+1, k)) {
+		if(rnd <= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * scale[j-k - 1] * etstackm(strand, i+1, k)) {
 		  //setDangle5(i+1, upst, dnst);
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i+1, k, 0);
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * scale[j-k - 1] * etstackm(strand, i+1, k);
+		  rnd -= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * scale[j-k - 1] * etstackm(strand, i+1, k);
 	      }
 	      
 	      if(k < j - 1) {
-		if(rnd <= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k)) { 
+		if(rnd <= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k)) { 
 		  //setDangle5(i+1, upst, dnst);
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i+1, k, 0);
@@ -350,7 +356,7 @@ void sample(RNA* strand, int samples) {
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+		  rnd -= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
 	      }
 	    }
 	    
@@ -375,40 +381,40 @@ void sample(RNA* strand, int samples) {
 	    iterator = strand->allowedPairs->ij[i];	    
 	    for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
 	      
-	      if(rnd <= multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]) {
+	      if(rnd <= multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]) {
 		push(&stack, i, k, 0);
 		push(&stack, k+1, j, 1);
 		found = TRUE;
 		break; 
 	      } else 
-		rnd -= multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]; 
+		rnd -= multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]; 
 	      
 	      if(k < j-1) {
-		if(rnd <= multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k)) {
+		if(rnd <= multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k)) {
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i, k, 0);
 		  push(&stack, k+2, j, 1);
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+		  rnd -= multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
 	      }
 	    }
 	    
 	    iteratorPlus1 = strand->allowedPairs->ij[i+1];
 	    for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {	    
 	      
-	      if(rnd <= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k)) {
+	      if(rnd <= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k)) {
 		//setDangle5(i+1, upst, dnst);
 		push(&stack, i+1, k, 0);
 		push(&stack, k+1, j, 1);
 		found = TRUE;
 		break;
 	      } else 
-		rnd -= multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+		rnd -= multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
 	      
 	      if(k < j - 1) {
-		if(rnd <= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k)) { 
+		if(rnd <= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k)) { 
 		  //setDangle5(i+1, upst, dnst);
 		  //setDangle3(k, upst, dnst);
 		  push(&stack, i+1, k, 0);
@@ -416,7 +422,7 @@ void sample(RNA* strand, int samples) {
 		  found = TRUE;
 		  break;
 		} else 
-		  rnd -= multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+		  rnd -= multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
 	      }
 	    }
 	    

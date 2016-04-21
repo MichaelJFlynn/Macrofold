@@ -10,6 +10,7 @@ typedef struct RNA RNA;
 double hairpinTerm(RNA* strand, int i, int j);
 double bulgeInternalTerm(RNA* strand, int i, int j);
 double bulgeInternalTermPeriodic(RNA* strand, int i, int j);
+double auPenalty(RNA* strand, int i, int j);
 double stackTerm(RNA* strand, int i, int j);
 double etstackm(RNA* strand, int i, int j);
 double ed3(RNA* strand, int i, int j);

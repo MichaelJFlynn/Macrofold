@@ -28,10 +28,10 @@ Official list of tests:
 ---- TRNAs, 5s Ribosomal RNA -> RNAStructure examples dir, 09wkj Nestor sequences dir
 
 
-1: implement AU
-2: implement tstackh
+1: [check] implement AU
+2: [check] implement tstackh -> same as regular tstack in 99 tables!
 3: implement gscale
-4: implement multiloop energies (can find in nndb)
+4: [check] implement multiloop energies (can find in nndb)
 5: unthorough verify
 5.5?: if 1x2 mismatches differ: implement 1x2 mismatches and 2x2 mismatches
 5: timing tests, random sequence stuff, go by 100s or 1000, out to 4000
