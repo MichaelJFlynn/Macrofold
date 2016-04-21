@@ -8,7 +8,6 @@
 
 // used to be g_misc[12]
 #define HAIRPINBASE 37
-#define auPenalty(i,j) 1
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
@@ -20,6 +19,7 @@ double hairpinTerm(RNA* strand, int i, int j)
   int length = strand->length;
   EnergyModel* em = strand->energyModel;
   char* seq = strand->sequence;
+  int* nSeq = strand->intSequence;
 
   if (loopSize < TURN)
     return 0.0;
@@ -37,13 +37,12 @@ double hairpinTerm(RNA* strand, int i, int j)
   else
     energy = em->hairpinLoop[29] * pow(HAIRPINBASE, log((double) loopSize / 30)) / em->scale[loopSize - 30];
 
-  /*
+  
   if (loopSize > 3)
-    energy *= g_tstackh[g_seq[i]][g_seq[j]][g_seq[i + 1]][g_seq[j - 1]];
+    energy *= em->tstack[nSeq[i]][nSeq[i+1]][nSeq[j-1]][nSeq[j]];
   else
-    energy *= auPenalty(i, j);
-  */
-
+    energy *= auPenalty(strand, i, j);
+  
   // Markham did binary search here, not sure how much this will
   // effect performance, but requires sorting the data alphabetically
   // I believe.
@@ -129,6 +128,11 @@ double bulgeInternalTermPeriodic(RNA* strand, int i, int j)
 }
 
 
+double auPenalty(RNA* strand, int i, int j) {
+  int* nSeq = strand->intSequence;
+  return strand->energyModel->auPenalty[nSeq[i]][nSeq[j]];
+}
+
 double stackTerm(RNA* strand, int i, int j)
 {
   int length = strand->length;
@@ -146,10 +150,9 @@ double stackTerm(RNA* strand, int i, int j)
 
 double etstackm(RNA* strand, int i, int j)
 {
-  return 1.0;
-  //  int* nSeq = strand->intSequence;
+  int* nSeq = strand->intSequence;
 
-  //return strand->energyModel->stackm[g_seq[j]][g_seq[i]][g_seq[j + 1]][g_seq[i - 1]];
+  return strand->energyModel->stack[nSeq[i]][nSeq[i + 1]][nSeq[j-1]][nSeq[j]];
 }
 
 double ed3(RNA* strand, int i, int j)
@@ -182,18 +185,18 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
       if (loopSize2 == 1)
 	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[j]][nSeq[ii]][nSeq[jj]] * scale * scale;
       else if (loopSize2 <= 30)
-	return em->bulgeLoop[loopSize2 - 1] * auPenalty(i, j) * auPenalty(ii, jj);
+	return em->bulgeLoop[loopSize2 - 1] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
       else
-	return em->bulgeLoop[29] * pow(HAIRPINBASE, log((double) loopSize2 / 30)) / em->scale[loopSize2 - 30] * auPenalty(i, j) * auPenalty(ii, jj);
+	return em->bulgeLoop[29] * pow(HAIRPINBASE, log((double) loopSize2 / 30)) / em->scale[loopSize2 - 30] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
     }
   else if (loopSize2 == 0)
     {
       if (loopSize1 == 1)
 	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[j]][nSeq[ii]][nSeq[jj]] * scale * scale;
       else if (loopSize1 <= 30)
-	return em->bulgeLoop[loopSize1 - 1] * auPenalty(i, j) * auPenalty(ii, jj);
+	return em->bulgeLoop[loopSize1 - 1] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
       else
-	return em->bulgeLoop[29] * pow(HAIRPINBASE, log((double) loopSize1 / 30)) / em->scale[loopSize1 - 30] * auPenalty(i, j) * auPenalty(ii, jj);
+	return em->bulgeLoop[29] * pow(HAIRPINBASE, log((double) loopSize1 / 30)) / em->scale[loopSize1 - 30] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
     } /* Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
   else if (loopSize1 == 1 && loopSize2 == 1)
     return g_sint2[basePairIndex(nSeq[i], nSeq[j])][basePairIndex(nSeq[ii], nSeq[jj])][nSeq[i + 1]][nSeq[j - 1]];

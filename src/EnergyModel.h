@@ -39,6 +39,7 @@ typedef struct EnergyModel {
   double multiA;
   double multiB;
   double multiC;
+  double auPenalty[4][4];
   double dangle3[4][4][4];
   double dangle5[4][4][4];
   HexaLoop hexaloop[NUM_HEXALOOPS];

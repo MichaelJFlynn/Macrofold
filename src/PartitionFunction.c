@@ -8,7 +8,7 @@
 #include "PartitionFunction.h"
 
 #define TURN 3
-#define auPenalty(i, j) 1
+
 
 PartitionFunction* allocatePartitionFunction(int length) {
   PartitionFunction* ret = (PartitionFunction*) malloc(sizeof(PartitionFunction));
@@ -62,9 +62,9 @@ void fillZbZ1Z2(RNA* strand) {
   double** Z1 = strand->partitionFunction->Z1;
 
 
-  double multiA = 1;//strand.energyModel.multiA;
-  double multiB = 1;//strand.energyModel.multiB;
-  double multiC = 1;//strand.energyModel.multiC;
+  double multiA = strand->energyModel->multiA;
+  double multiB = strand->energyModel->multiB;
+  double multiC = strand->energyModel->multiC;
   double scale = strand->energyModel->scale[1];
   double* bscale = strand->energyModel->bscale;
 
@@ -89,7 +89,7 @@ void fillZbZ1Z2(RNA* strand) {
   for (j = TURN + 1; j < strand->length; ++j)
     for (i = j - TURN - 1; i >= 0; --i)
       {
-	double au = auPenalty(i, j);
+	double au = auPenalty(strand, i, j);
 
 	PairIterator* iterator = strand->allowedPairs->ij[i];
 	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
@@ -108,28 +108,28 @@ void fillZbZ1Z2(RNA* strand) {
 	Z1[i][j] = multiB * Z1[i+1][j] / scale;	
 	for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
 	  if(k > j) break;
-	  Z1[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * bscale[j-k];	  
+	  Z1[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * bscale[j-k];	  
 	  if(k < j) { 
-	    Z1[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]; 
-	    Z1[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k);
-	    Z2[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j];	  
+	    Z1[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]; 
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k);
+	    Z2[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j];	  
 	    if(k < j - 1) {
-	      Z1[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
-	      Z2[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+	      Z1[i][j] += multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+	      Z2[i][j] += multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
 	    }
 	  }
 	}
 
 	for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
 	  if(k > j) break;
-	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k);
+	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k);
 	  if(k < j) { 
-	    Z1[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k);
-	    Z2[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k);
+	    Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
 	    if(k < j - 1) {
-	      Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
-	      Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+	      Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
+	      Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
 	    }
 	  }
 	}
@@ -156,12 +156,12 @@ void fillZ(RNA* strand) {
     iterator = strand->allowedPairs->ji[j];
     for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
       if(k < 0) break;
-      Z[0][j] += auPenalty(k, j) * Zb[k][j] / scale[k - 1];
+      Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k - 1];
       if(k > 1) {
-	Z[0][j] += auPenalty(k, j) * Z[0][k-1] * Zb[k][j];
-	Z[0][j] += auPenalty(k, j) * Zb[k][j] / scale[k-2] * ed5(strand, k, j);
+	Z[0][j] += auPenalty(strand, k, j) * Z[0][k-1] * Zb[k][j];
+	Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k-2] * ed5(strand, k, j);
 	if(k > 2) {
-	  Z[0][j] += auPenalty(k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
+	  Z[0][j] += auPenalty(strand, k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
 	}
       }
     }
@@ -169,12 +169,12 @@ void fillZ(RNA* strand) {
     iteratorMinus1 = strand->allowedPairs->ji[j-1];
     for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       if(k < 0) break;
-      Z[0][j] += auPenalty(k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
+      Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
       if(k > 1) {
-	Z[0][j] += auPenalty(k, j-1) * Z[0][k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
-	Z[0][j] += auPenalty(k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-2];
+	Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
+	Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-2];
 	if(k > 2) {
-	  Z[0][j] += auPenalty(k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
+	  Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
 	}
       }
     
@@ -187,24 +187,24 @@ void fillZ(RNA* strand) {
     
     iterator = strand->allowedPairs->ij[i];
     for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
-      Z[i][len-1] += auPenalty(i, k) * Zb[i][k]/scale[len-1 - k];
+      Z[i][len-1] += auPenalty(strand, i, k) * Zb[i][k]/scale[len-1 - k];
       if(k < len-1) {
-	Z[i][len-1] += auPenalty(i, k) * Zb[i][k] * Z[k+1][len-1]; 
-	Z[i][len-1] += auPenalty(i, k) * Zb[i][k] / scale[len-1 - k - 1] * ed3(strand,i,k);
+	Z[i][len-1] += auPenalty(strand, i, k) * Zb[i][k] * Z[k+1][len-1]; 
+	Z[i][len-1] += auPenalty(strand, i, k) * Zb[i][k] / scale[len-1 - k - 1] * ed3(strand,i,k);
 	if(k < len-1-1) {
-	  Z[i][len-1] += auPenalty(i, k) * Zb[i][k] * Z[k+2][len-1] * ed3(strand, i, k);
+	  Z[i][len-1] += auPenalty(strand, i, k) * Zb[i][k] * Z[k+2][len-1] * ed3(strand, i, k);
 	}
       }
     }
     
     iteratorMinus1 = strand->allowedPairs->ij[i+1];
     for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
-      Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] / scale[len-1 - k] * ed5(strand, i+1, k);
+      Z[i][len-1] += auPenalty(strand, i+1, k) * Zb[i+1][k] / scale[len-1 - k] * ed5(strand, i+1, k);
       if(k < len-1) {
-	Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] * Z[k+1][len-1] * ed5(strand, i+1, k); 
-	Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] / scale[len-1 - k - 1] * etstackm(strand, i + 1, k);
+	Z[i][len-1] += auPenalty(strand, i+1, k) * Zb[i+1][k] * Z[k+1][len-1] * ed5(strand, i+1, k); 
+	Z[i][len-1] += auPenalty(strand, i+1, k) * Zb[i+1][k] / scale[len-1 - k - 1] * etstackm(strand, i + 1, k);
 	if(k < len-1-1) {
-	  Z[i][len-1] += auPenalty(i+1, k) * Zb[i+1][k] * Z[k+2][len-1] * etstackm(strand, i + 1, k);
+	  Z[i][len-1] += auPenalty(strand, i+1, k) * Zb[i+1][k] * Z[k+2][len-1] * etstackm(strand, i + 1, k);
 	}
       }
     }
@@ -223,9 +223,9 @@ void fillExtendedZbZ1Z2(RNA* strand) {
   double** Z1 = strand->partitionFunction->Z1;
 
 
-  double multiA = 1;//strand.energyModel.multiA;
-  double multiB = 1;//strand.energyModel.multiB;
-  double multiC = 1;//strand.energyModel.multiC;
+  double multiA = strand->energyModel->multiA;
+  double multiB = strand->energyModel->multiB;
+  double multiC = strand->energyModel->multiC;
   double* scale = strand->energyModel->scale;
   double* bscale = strand->energyModel->bscale;
   PairIterator* iterator;
@@ -233,7 +233,7 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 
   for(j = len + 1; j < 2 * len; j++) {
     for(i = len - 2; i > j - len; i--) {
-      double au = auPenalty(i, j - len);
+      double au = auPenalty(strand, i, j - len);
       // no hairpin term, not allowed in crossing 
       if(isCannonical(strand, i, j - len)) {
 
@@ -272,11 +272,11 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       iterator = strand->allowedPairs->ij[i];
       for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
 	if(k < len - 1) {
-	  Z1[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j]; 
-	  Z2[i][j] += multiC * auPenalty(i, k) * Zb[i][k] * Z1[k+1][j];	  
+	  Z1[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j]; 
+	  Z2[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+1][j];	  
 	  if(k < len - 2) {
-	    Z1[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
-	    Z2[i][j] += multiC * multiB * auPenalty(i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
+	    Z2[i][j] += multiC * multiB * auPenalty(strand, i, k) * Zb[i][k] * Z1[k+2][j] * ed3(strand, i, k);
 	  }
 	}
       }
@@ -284,11 +284,11 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       iteratorPlus1 = strand->allowedPairs->ij[i+1];
       for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
 	if(k < len - 1) { 
-	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
-	  Z2[i][j] += multiC * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	  Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
 	  if(k < len + 2) {
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
-	    Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
+	    Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
 	  }
 	}
       }
@@ -297,14 +297,14 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       iterator = strand->allowedPairs->ji[i];
       for(k = start(iterator) + len; hasNext(iterator); k = next(iterator) + len) {
 	if(k > j) continue;
-	Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * bscale[j-k];	  
+	Z1[i][j] += multiC * auPenalty(strand, i, k - len) * Zb[i][k] * bscale[j-k];	  
 	if(k < j) { 
-	  Z1[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len]; 
-	  Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k - len);
-	  Z2[i][j] += multiC * auPenalty(i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len];	  
+	  Z1[i][j] += multiC * auPenalty(strand, i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len]; 
+	  Z1[i][j] += multiC * multiB * auPenalty(strand, i, k - len) * Zb[i][k] * bscale[j-(k+1)] * ed3(strand, i, k - len);
+	  Z2[i][j] += multiC * auPenalty(strand, i, k - len) * Zb[i][k] * Z1[k+1 - len][j - len];	  
 	  if(k < j - 1) {
-	    Z1[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
-	    Z2[i][j] += multiC * multiB * auPenalty(i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
+	    Z2[i][j] += multiC * multiB * auPenalty(strand, i, k - len) * Zb[i][k] * Z1[k+2 - len][j - len] * ed3(strand, i, k - len);
 	  }
 	}
       }
@@ -312,14 +312,14 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       iteratorPlus1 = strand->allowedPairs->ji[i+1];
       for(k = start(iteratorPlus1) + len; hasNext(iteratorPlus1); k = next(iteratorPlus1) + len) {
 	if(k > j) continue;
-	Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
+	Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
 	if(k < j) { 
-	  Z1[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
-	  Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
-	  Z2[i][j] += multiC * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
+	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
+	  Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
+	  Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
 	  if(k < j - 1) {
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);	  
-	    Z2[i][j] += multiC * multiB * multiB * auPenalty(i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);	  
+	    Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);
 	  }
 	}
       }  
