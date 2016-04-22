@@ -73,6 +73,7 @@ RNA* readSequenceFile(char* filename) {
   while(isspace(sequence[i])) {
     sequence[i] = 0;
     i--;
+
   }
 
   return allocateRNA(sequence);

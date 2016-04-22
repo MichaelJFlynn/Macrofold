@@ -152,7 +152,8 @@ double etstackm(RNA* strand, int i, int j)
 {
   int* nSeq = strand->intSequence;
 
-  return strand->energyModel->stack[nSeq[i]][nSeq[i + 1]][nSeq[j-1]][nSeq[j]];
+  // this code is implemented as if i-j are the inner pair
+  return strand->energyModel->tstack[nSeq[i-1]][nSeq[i]][nSeq[j]][nSeq[j+1]];
 }
 
 double ed3(RNA* strand, int i, int j)
@@ -183,7 +184,7 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
   if (loopSize1 == 0)
     {
       if (loopSize2 == 1)
-	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[j]][nSeq[ii]][nSeq[jj]] * scale * scale;
+	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[ii]][nSeq[jj]][nSeq[j]] * scale * scale;
       else if (loopSize2 <= 30)
 	return em->bulgeLoop[loopSize2 - 1] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
       else
@@ -192,7 +193,7 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
   else if (loopSize2 == 0)
     {
       if (loopSize1 == 1)
-	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[j]][nSeq[ii]][nSeq[jj]] * scale * scale;
+	return em->bulgeLoop[0] * em->stack[nSeq[i]][nSeq[ii]][nSeq[jj]][nSeq[j]] * scale * scale;
       else if (loopSize1 <= 30)
 	return em->bulgeLoop[loopSize1 - 1] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
       else
