@@ -50,7 +50,7 @@ double hairpinTerm(RNA* strand, int i, int j)
     {
       //if ((loop = bsearch(g_seq + i, g_triloop, numTriloops, sizeof(struct triloop), triloopcmp)))
       for(k = 0; k < NUM_TRILOOPS; k++) {
-	if(memcmp(em->triloop[k].loop, seq + i, 5)) {
+	if(!memcmp(em->triloop[k].loop, seq + i, 5)) {
 	  energy *= em->triloop[k].energy;
 	  break;
 	}
@@ -59,7 +59,7 @@ double hairpinTerm(RNA* strand, int i, int j)
   else if (loopSize == 4)
     {
       for(k = 0; k < NUM_TLOOPS; k++) {
-	if(memcmp(em->tloop[k].loop, seq + i, 6)) {
+	if(!memcmp(em->tloop[k].loop, seq + i, 6)) {
 	  energy *= em->tloop[k].energy;
 	  break;
 	}
@@ -68,7 +68,7 @@ double hairpinTerm(RNA* strand, int i, int j)
   else if (loopSize == 6)
     {
       for(k = 0; k < NUM_HEXALOOPS; k++) {
-	if(memcmp(em->hexaloop[k].loop, seq + i, 8)) {
+	if(!memcmp(em->hexaloop[k].loop, seq + i, 8)) {
 	  energy *= em->hexaloop[k].energy;
 	  break;
 	}

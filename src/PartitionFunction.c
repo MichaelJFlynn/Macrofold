@@ -94,6 +94,13 @@ void fillZbZ1Z2(RNA* strand) {
 	PairIterator* iterator = strand->allowedPairs->ij[i];
 	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
 
+	if(i == 1 && j == 7) {
+	  // case 1!
+	}
+	if(i == 1 && j == 6) { 
+	  // case 2!
+	}
+
 	if(isCannonical(strand, i, j)) {
 	  Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
 	  Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 

@@ -20,33 +20,27 @@ def convertHairpinBulgeInternal():
             skips -= 1
             continue
         tokens = line.split()
-        if tokens[1] is ".":
-            continue
-        # size column
-        for f in [hairpinFile, bulgeFile, internalFile]:
-            f.write(tokens[0])
-            f.write(",")
         
         # internal energy column
-        if tokens[1] is ".":
-            internalFile.write("Inf")
-        else:
+        if tokens[1] is not ".":
+            internalFile.write(tokens[0])
+            internalFile.write(",")
             internalFile.write(tokens[1])
-        internalFile.write("\n")
+            internalFile.write("\n")
 
         # bulge energy column
-        if tokens[2] is ".":
-            bulgeFile.write("Inf")
-        else:
+        if tokens[2] is not ".":
+            bulgeFile.write(tokens[0])
+            bulgeFile.write(",")
             bulgeFile.write(tokens[2])
-        bulgeFile.write("\n")
+            bulgeFile.write("\n")
 
         # hairpin energy column
-        if tokens[3] is ".":
-            hairpinFile.write("Inf")
-        else:
+        if tokens[3] is not ".":
+            hairpinFile.write(tokens[0])
+            hairpinFile.write(",")
             hairpinFile.write(tokens[3])
-        hairpinFile.write("\n")
+            hairpinFile.write("\n")
     
     loopFile.close()
     hairpinFile.close()

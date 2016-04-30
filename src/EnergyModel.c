@@ -103,7 +103,7 @@ void loadHairpin(RNA* strand) {
 
   for(i = 0; i < hairpinData->nrow; i++) {
     int k = atoi(get(hairpinData, i, 0));
-    strand->energyModel->hairpinLoop[k] = exp(-atof(get(hairpinData, i,1)) / (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
+    strand->energyModel->hairpinLoop[k - 1] = exp(-atof(get(hairpinData, i,1)) / (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
   }
  
   freeDataFile(hairpinData);
@@ -115,7 +115,7 @@ void loadInternal(RNA* strand) {
 
   for(i = 0; i < internalData->nrow; i++) {
     int k = atoi(get(internalData, i, 0));
-    strand->energyModel->internalLoop[k] = exp(-atof(get(internalData, i, 1))/(R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
+    strand->energyModel->internalLoop[k-1] = exp(-atof(get(internalData, i, 1))/(R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
   }
   freeDataFile(internalData);
 }
@@ -125,7 +125,7 @@ void loadBulge(RNA* strand) {
   int i;
   for(i = 0; i < bulgeData->nrow; i++) {
     int k = atoi(get(bulgeData, i, 0));
-    strand->energyModel->bulgeLoop[k] = exp(-atof(get(bulgeData,i,1))/ (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
+    strand->energyModel->bulgeLoop[k-1] = exp(-atof(get(bulgeData,i,1))/ (R * strand->temperature)) / pow(strand->energyModel->scale[1], k + 3);
   }
 
   freeDataFile(bulgeData);
@@ -157,7 +157,7 @@ void load5dangle(RNA* strand) {
 }
 
 void loadTStack(RNA* strand) {
-  DataFile* stackData = readCSV("../data/stack.csv");
+  DataFile* stackData = readCSV("../data/tstack.csv");
   int i;
 
   for(i = 0; i < stackData->nrow; i++) {

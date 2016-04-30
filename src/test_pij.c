@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   for(i = 0; i < strand->length; i++) {
     for(j = 0; j < strand->length; j++) {
       if(i < j) {
-	printf("%.4e\t", strand->partitionFunction->P[i][j]);
+	printf("%.4e\t", strand->partitionFunction->Zb[i][j]);
       } else {
 	printf("           \t");
       }

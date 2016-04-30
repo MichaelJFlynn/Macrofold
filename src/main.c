@@ -30,7 +30,7 @@ Official list of tests:
 
 1: [check] implement AU
 2: [check] implement tstackh -> same as regular tstack in 99 tables!
-3: implement gscale
+3: [check] implement gscale
 4: [check] implement multiloop energies (can find in nndb)
 5: unthorough verify
 5.5?: if 1x2 mismatches differ: implement 1x2 mismatches and 2x2 mismatches
