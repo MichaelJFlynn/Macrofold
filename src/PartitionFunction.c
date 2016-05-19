@@ -94,13 +94,6 @@ void fillZbZ1Z2(RNA* strand) {
 	PairIterator* iterator = strand->allowedPairs->ij[i];
 	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
 
-	if(i == 1 && j == 7) {
-	  // case 1!
-	}
-	if(i == 1 && j == 6) { 
-	  // case 2!
-	}
-
 	if(isCannonical(strand, i, j)) {
 	  Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
 	  Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
@@ -163,10 +156,10 @@ void fillZ(RNA* strand) {
     iterator = strand->allowedPairs->ji[j];
     for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
       if(k < 0) break;
-      Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k - 1];
+      Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k];
       if(k > 1) {
 	Z[0][j] += auPenalty(strand, k, j) * Z[0][k-1] * Zb[k][j];
-	Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k-2] * ed5(strand, k, j);
+	Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k-1] * ed5(strand, k, j);
 	if(k > 2) {
 	  Z[0][j] += auPenalty(strand, k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
 	}
@@ -176,10 +169,10 @@ void fillZ(RNA* strand) {
     iteratorMinus1 = strand->allowedPairs->ji[j-1];
     for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       if(k < 0) break;
-      Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k-1];
+      Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k];
       if(k > 1) {
 	Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
-	Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-2];
+	Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1];
 	if(k > 2) {
 	  Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
 	}
@@ -238,13 +231,18 @@ void fillExtendedZbZ1Z2(RNA* strand) {
   PairIterator* iterator;
   PairIterator* iteratorPlus1;
 
-  for(j = len + 1; j < 2 * len; j++) {
-    for(i = len - 2; i > j - len; i--) {
+  for(j = len; j < 2 * len; j++) {
+    for(i = len - 1; i > j - len; i--) {
       double au = auPenalty(strand, i, j - len);
       // no hairpin term, not allowed in crossing 
-      if(isCannonical(strand, i, j - len)) {
+      if(i == 14 && j == 25) {
+	// debug
+      }
+      
+      if(isCannonical(strand, i, j - len) && i - (j - len) > TURN) {
 
-	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1] + bulgeInternalTermPeriodic(strand, i, j - len);
+	Zb[i][j] = stackTerm(strand, i, j-len) * Zb[i+1][j-1];
+	Zb[i][j] += bulgeInternalTermPeriodic(strand, i, j - len);
 	Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1]
 					    + ed5(strand, j - len, i) * multiB *Z2[i+1][j-2]
 					    + ed3(strand, j - len,i) * multiB * Z2[i+2][j-1]
@@ -288,14 +286,16 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	}
       }
 
-      iteratorPlus1 = strand->allowedPairs->ij[i+1];
-      for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
-	if(k < len - 1) { 
-	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
-	  Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
-	  if(k < len + 2) {
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
-	    Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+      if(i < len - 1) {
+	iteratorPlus1 = strand->allowedPairs->ij[i+1];
+	for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
+	  if(k < len - 1) { 
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	    Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+1][j] * ed5(strand, i+1, k);
+	    if(k < len + 2) {
+	      Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);	  
+	      Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * Z1[k+2][j] * etstackm(strand, i+1, k);
+	    }
 	  }
 	}
       }
@@ -315,21 +315,23 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	  }
 	}
       }
-
-      iteratorPlus1 = strand->allowedPairs->ji[i+1];
-      for(k = start(iteratorPlus1) + len; hasNext(iteratorPlus1); k = next(iteratorPlus1) + len) {
-	if(k > j) continue;
-	Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
-	if(k < j) { 
-	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
-	  Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
-	  Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
-	  if(k < j - 1) {
-	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);	  
-	    Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);
+      
+      if(i < len - 1) {
+	iteratorPlus1 = strand->allowedPairs->ji[i+1];
+	for(k = start(iteratorPlus1) + len; hasNext(iteratorPlus1); k = next(iteratorPlus1) + len) {
+	  if(k > j) continue;
+	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k - len);
+	  if(k < j) { 
+	    Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
+	    Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * bscale[j- (k+1)] * etstackm(strand, i+1, k - len);
+	    Z2[i][j] += multiC * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+1 - len][j - len] * ed5(strand, i+1, k - len);
+	    if(k < j - 1) {
+	      Z1[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);	  
+	      Z2[i][j] += multiC * multiB * multiB * auPenalty(strand, i+1, k - len) * Zb[i+1][k] * Z1[k+2 - len][j - len] * etstackm(strand, i+1, k - len);
+	    }
 	  }
-	}
-      }  
+	}  
+      }
     } 
   }
 

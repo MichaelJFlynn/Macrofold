@@ -24,7 +24,7 @@ double hairpinTerm(RNA* strand, int i, int j)
   if (loopSize < TURN)
     return 0.0;
 
-  if (i <= length && length < j)
+  if (i <= length-1 && length-1 < j)
     return 0.0;
   else if (i > length)
     {
@@ -137,7 +137,7 @@ double stackTerm(RNA* strand, int i, int j)
 {
   int length = strand->length;
   int* nSeq = strand->intSequence;
-  if (i == length || j == length + 1)
+  if (i == length - 1 || j == length)
     return 0.0;
 
   if (i > length)
@@ -151,7 +151,9 @@ double stackTerm(RNA* strand, int i, int j)
 double etstackm(RNA* strand, int i, int j)
 {
   int* nSeq = strand->intSequence;
-
+  if(j >= strand->length - 1){
+    return 0;
+  } 
   // this code is implemented as if i-j are the inner pair
   return strand->energyModel->tstack[nSeq[i-1]][nSeq[i]][nSeq[j]][nSeq[j+1]];
 }
@@ -159,6 +161,9 @@ double etstackm(RNA* strand, int i, int j)
 double ed3(RNA* strand, int i, int j)
 {
   int* nSeq = strand->intSequence;
+  if(j >= strand->length - 1) { 
+    return 0;
+  }
   return strand->energyModel->dangle3[nSeq[j]][nSeq[i]][nSeq[j + 1]];
 }
 
