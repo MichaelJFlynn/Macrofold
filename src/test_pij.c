@@ -26,14 +26,14 @@ int main(int argc, char* argv[]) {
   
   int i, j;
   for(i = 0; i < strand->length; i++) {
-    for(j = 0; j < strand->length; j++) {
-      if(i < j) {
-	printf("%.4e\t", strand->partitionFunction->P[i][j]);
-      } else {
-	printf("           \t");
-      }
-    }
-    printf("\n");
-  }
+    //    for(j = 0; j < 2*strand->length; j++) {
+    //if(i < j) {
+    printf("%.4e\t", strand->partitionFunction->Z[0][i]);
+    //} else {
+    ///printf("           \t");
+    //}
+    //}
+    //printf("\n");
+  } printf("\n");
   
 }

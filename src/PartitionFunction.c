@@ -6,6 +6,7 @@
 #include "AllowedPairs.h"
 #include "PairIterator.h"
 #include "PartitionFunction.h"
+#include <math.h>
 
 #define TURN 3
 
@@ -56,7 +57,6 @@ void freePartitionFunction(RNA* strand) {
 void fillZbZ1Z2(RNA* strand) {
   int i, j, k;  
 
-  //  double* Z = strand->pfData.Z;
   double** Zb = strand->partitionFunction->Zb;
   double** Z2 = strand->partitionFunction->Z2;
   double** Z1 = strand->partitionFunction->Z1;
@@ -157,10 +157,10 @@ void fillZ(RNA* strand) {
     for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
       if(k < 0) break;
       Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k];
-      if(k > 1) {
+      if(k > 0) {
 	Z[0][j] += auPenalty(strand, k, j) * Z[0][k-1] * Zb[k][j];
 	Z[0][j] += auPenalty(strand, k, j) * Zb[k][j] / scale[k-1] * ed5(strand, k, j);
-	if(k > 2) {
+	if(k > 1) {
 	  Z[0][j] += auPenalty(strand, k, j) * Z[0][k-2] * Zb[k][j] * ed5(strand, k, j);
 	}
       }
@@ -170,17 +170,18 @@ void fillZ(RNA* strand) {
     for(k = start(iteratorMinus1); hasNext(iteratorMinus1); k = next(iteratorMinus1)) {
       if(k < 0) break;
       Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k];
-      if(k > 1) {
+      if(k > 0) {
 	Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-1] * Zb[k][j-1] * ed3(strand, k, j-1);
 	Z[0][j] += auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1];
-	if(k > 2) {
+	if(k > 1) {
 	  Z[0][j] += auPenalty(strand, k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-1);
 	}
       }
     
     }
   }
-
+  
+  double pfun = Z[0][len-1];
 
   for(i = len - 2; i >= 0; i--) {
     Z[i][len-1] = Z[i + 1][len-1] / scale[1];
@@ -209,6 +210,11 @@ void fillZ(RNA* strand) {
       }
     }
   }
+
+  if(fabs(pfun -  Z[0][len-1]) > 1e-12) { 
+    printf("What gives? |%g -  %g |= %g\n", pfun, Z[0][len-1], pfun-Z[0][len-1]);
+  }
+  
 
   strand->partitionFunction->filledZ = 1;
 }
