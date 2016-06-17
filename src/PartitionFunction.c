@@ -91,9 +91,6 @@ void fillZbZ1Z2(RNA* strand) {
       {
 	double au = auPenalty(strand, i, j);
 
-	PairIterator* iterator = strand->allowedPairs->ij[i];
-	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
-
 	if(isCannonical(strand, i, j)) {
 	  Zb[i][j] = hairpinTerm(strand, i, j) + stackTerm(strand, i,j) * Zb[i + 1][j - 1] + bulgeInternalTerm(strand, i, j);	
 	  Zb[i][j] += multiA * multiC * au * (Z2[i+1][j-1] 
@@ -104,8 +101,14 @@ void fillZbZ1Z2(RNA* strand) {
 	  Zb[i][j] = 0;
 	}
 
+	if(Zb[i][j] != Zb[i][j]) { 
+	  // debug check
+	}
+
 	Z2[i][j] = multiB * Z2[i+1][j] / scale;
 	Z1[i][j] = multiB * Z1[i+1][j] / scale;	
+
+	PairIterator* iterator = strand->allowedPairs->ij[i];
 	for(k = start(iterator); hasNext(iterator); k = next(iterator)) {
 	  if(k > j) break;
 	  Z1[i][j] += multiC * auPenalty(strand, i, k) * Zb[i][k] * bscale[j-k];	  
@@ -120,6 +123,7 @@ void fillZbZ1Z2(RNA* strand) {
 	  }
 	}
 
+	PairIterator* iteratorPlus1 = strand->allowedPairs->ij[i+1];
 	for(k = start(iteratorPlus1); hasNext(iteratorPlus1); k = next(iteratorPlus1)) {
 	  if(k > j) break;
 	  Z1[i][j] += multiC * multiB * auPenalty(strand, i+1, k) * Zb[i+1][k] * bscale[j-k] * ed5(strand, i+1, k);
@@ -241,7 +245,7 @@ void fillExtendedZbZ1Z2(RNA* strand) {
     for(i = len - 1; i > j - len; i--) {
       double au = auPenalty(strand, i, j - len);
       // no hairpin term, not allowed in crossing 
-      if(i == 14 && j == 25) {
+      if(i == 519 && j == 2000) {
 	// debug
       }
       
@@ -272,9 +276,13 @@ void fillExtendedZbZ1Z2(RNA* strand) {
       } else {
 	Zb[i][j] = 0;
       }
+
+      if(Zb[i][j] != Zb[i][j]) {
+	// debug
+      }
 	
-      Z2[i][j] = multiB * Z2[i+1][j] / scale[0];
-      Z1[i][j] = multiB * Z1[i+1][j] / scale[0];	
+      Z2[i][j] = multiB * Z2[i+1][j] / scale[1];
+      Z1[i][j] = multiB * Z1[i+1][j] / scale[1];	
 
       // k is on the same side as i *********************************
       // in this case Z1 is the same as Z2 because no completely empty
@@ -338,6 +346,15 @@ void fillExtendedZbZ1Z2(RNA* strand) {
 	  }
 	}  
       }
+
+      if(Z2[i][j] != Z2[i][j]) {
+	// debug
+      }
+
+      if(Z1[i][j] != Z1[i][j]) {
+	// debug
+      }
+
     } 
   }
 
@@ -356,9 +373,9 @@ void fillP(RNA* strand) {
       if(Zb[i][j] == 0)
 	continue;
       P[i][j] = Zb[i][j] * Zb[j][i + len] * scale[2] / Z[0][len - 1];
-      if(P[i][j] > 1.001 || P[i][j] < -.001) {
-	printf("Warning: P(%d,%d) = %g\n", i,j,P[i][j]);
-      }
+      /* if(P[i][j] > 1.001 || P[i][j] < -.001) { */
+      /* 	printf("Warning: P(%d,%d) = %g\n", i,j,P[i][j]); */
+      /* } */
     }
   }
   strand->partitionFunction->filledP = 1;

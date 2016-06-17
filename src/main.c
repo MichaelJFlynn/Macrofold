@@ -44,7 +44,7 @@ Official list of tests:
 
 int main(int argc, char* argv[]) {
   // tests 
-  RNA* strand = readSequenceFile("sample.seq");
+  RNA* strand = readSequenceFile("../tests/randseqs/2000.seq");
 
   computePartitionFunction(strand);
 
@@ -55,14 +55,15 @@ int main(int argc, char* argv[]) {
   /* startConsole(mc); */
 
 
-  sample(strand, 1000);
+  //sample(strand, 1000);
   int i, j;
-  for(i = 0; i < 1000; i++) {
-    for(j = 0; j < strand->length; j++) {
-      printf("%d ", strand->samples->structures[i][j]);
+  for(i = 0; i < strand->length; i++) {
+    for(j = 0; j < 2*strand->length; j++) {
+      printf("(%.4d,%.4d):%.4e\t", i, j, strand->partitionFunction->Zb[i][j]);
     }
-    printf("\n");    
+    printf("\n");
   }
+  
 
 
 

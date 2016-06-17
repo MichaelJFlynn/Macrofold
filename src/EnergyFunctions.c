@@ -151,7 +151,7 @@ double stackTerm(RNA* strand, int i, int j)
 double etstackm(RNA* strand, int i, int j)
 {
   int* nSeq = strand->intSequence;
-  if(j >= strand->length - 1){
+  if(j >= strand->length - 1 || i <= 0){
     return 0;
   } 
   // this code is implemented as if i-j are the inner pair

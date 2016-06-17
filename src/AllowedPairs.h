@@ -16,6 +16,9 @@ typedef struct AllowedPairs {
 
 void freeAllowedPairs(AllowedPairs* allowPairs);
 AllowedPairs* fromAllPairs(RNA* strand);
+AllowedPairs* fromProbablePairs(RNA* strand, float thresh);
+AllowedPairs* fromProbablePairs2(RNA* strand, float thresh);
 void printAllowedPairs(AllowedPairs* ap);
+
 
 #endif

@@ -14,5 +14,5 @@ int hasNext(PairIterator* pairIterator);
 int next(PairIterator* pairIterator);
 int start(PairIterator* pairIterator);
 void add(PairIterator* pairIterator, int element);
-
+void printPairIterator(PairIterator* pairIterator);
 #endif

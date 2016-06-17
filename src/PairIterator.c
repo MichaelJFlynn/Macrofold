@@ -46,3 +46,11 @@ void add(PairIterator* pairIterator, int element) {
   pairIterator->pairs[pairIterator->size] = element;
   pairIterator->size++;
 }
+
+void printPairIterator(PairIterator* pairIterator) {
+  int i;
+  for(i = 0; i < pairIterator->size; i++) { 
+    printf("%d\t", pairIterator->pairs[i]);
+  }
+  printf("\n");
+}

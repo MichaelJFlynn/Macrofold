@@ -23,7 +23,6 @@ void freeSamples(StochasticSamples* samples);
 Structure allocateStructure(RNA* strand);
 void freeStructure(Structure str);
 void pair(Structure s, int i, int j);
-
-
 void sample(RNA* strand, int numSamples);
+Structure sampleStructure(RNA* strand);
 void push(stackNode** s, int i, int j, int m);

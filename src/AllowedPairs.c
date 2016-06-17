@@ -2,6 +2,7 @@
 #include "AllowedPairs.h"
 #include "PairIterator.h"
 #include "EnergyFunctions.h" // for TURN definition
+#include "PartitionFunction.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -36,6 +37,79 @@ AllowedPairs* fromAllPairs(RNA* strand) {
   }
   return ap;
 }
+
+
+AllowedPairs* fromProbablePairs(RNA* strand, float threshold) { 
+  int length = strand->length;
+  int i,j;
+  AllowedPairs* ap = (AllowedPairs*) malloc(sizeof(AllowedPairs));
+  ap->size = length;
+  ap->thresh = threshold;
+  ap->ji = (PairIterator**) malloc(length * sizeof(PairIterator*));
+  ap->ij = (PairIterator**) malloc(length * sizeof(PairIterator*));
+
+  double** P = strand->partitionFunction->P;
+  double** Zb = strand->partitionFunction->Zb;
+
+  for(i =0; i < length; i++) {
+    ap->ij[i] = allocatePairIterator(length);
+    ap->ji[i] = allocatePairIterator(length);
+  }
+
+  for(i = 0; i < length;  i++) {
+    for(j =i+TURN; j < length; j++) {
+      if(isCannonical(strand, i, j) && P[i][j] > threshold) {
+	add(ap->ij[i], j);
+      }
+    }
+  }
+
+  for(j = length - 1; j >= 0;  j--) {
+    for(i =j-TURN; i >= 0; i--) {
+      if(isCannonical(strand, i, j) && P[i][j] > threshold) {
+	add(ap->ji[j], i);
+      }
+    }
+  }
+  return ap;  
+}
+
+
+AllowedPairs* fromProbablePairs2(RNA* strand, float threshold) { 
+  int length = strand->length;
+  int i,j;
+  AllowedPairs* ap = (AllowedPairs*) malloc(sizeof(AllowedPairs));
+  ap->size = length;
+  ap->thresh = threshold;
+  ap->ji = (PairIterator**) malloc(length * sizeof(PairIterator*));
+  ap->ij = (PairIterator**) malloc(length * sizeof(PairIterator*));
+
+  double** P = strand->partitionFunction->P;
+  double** Zb = strand->partitionFunction->Zb;
+
+  for(i =0; i < length; i++) {
+    ap->ij[i] = allocatePairIterator(length);
+    ap->ji[i] = allocatePairIterator(length);
+  }
+
+  for(i = 0; i < length;  i++) {
+    for(j =i+TURN; j < length; j++) {
+      if(isCannonical(strand, i, j) && Zb[i][j] > threshold) {
+	add(ap->ij[i], j);
+      }
+    }
+  }
+
+  for(j = length - 1; j >= 0;  j--) {
+    for(i =j-TURN; i >= 0; i--) {
+      if(isCannonical(strand, i, j) && Zb[i][j] > threshold) {
+	add(ap->ji[j], i);
+      }
+    }
+  }
+  return ap;  
+}
+
 
 void freeAllowedPairs(AllowedPairs* allowedPairs) {
   int i;
