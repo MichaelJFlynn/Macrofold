@@ -2,7 +2,7 @@
 touch stochTimeTests.txt
 rm stochTimeTests.txt
 touch stochTimeTests.txt
-echo "Filename\tLength\tNormal\tProbable" >> stochTimeTests.txt
+echo "Filename\tLength\tNormal\tminus10\tminus8\tminus6\tminus4" >> stochTimeTests.txt
 for((i = 100; i <= 4000;i=i+100))
 do
     echo $i
