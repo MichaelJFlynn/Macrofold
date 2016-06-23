@@ -18,7 +18,6 @@ Notes:
 - markham: 2d array in 1d array?
 - Zuker: markham parraellized
 
-
 Official list of tests:
 - compare free energy to Unafold
 - compare P[i][j] to unafold
@@ -26,7 +25,6 @@ Official list of tests:
 - compare longer sequences for multibranch rules
 - compare to cannonical RNA sequences:
 ---- TRNAs, 5s Ribosomal RNA -> RNAStructure examples dir, 09wkj Nestor sequences dir
-
 
 1: [check] implement AU
 2: [check] implement tstackh -> same as regular tstack in 99 tables!
@@ -41,7 +39,6 @@ Official list of tests:
 9: thorough verify against unafold, test above
  */
 
-
 int main(int argc, char* argv[]) {
   // tests 
   RNA* strand = readSequenceFile("../tests/randseqs/2000.seq");
@@ -55,7 +52,7 @@ int main(int argc, char* argv[]) {
   /* startConsole(mc); */
 
 
-  //sample(strand, 1000);
+  /* sample(strand, 1000); */
   int i, j;
   for(i = 0; i < strand->length; i++) {
     for(j = 0; j < 2*strand->length; j++) {

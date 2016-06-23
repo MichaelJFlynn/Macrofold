@@ -192,9 +192,10 @@ Structure sampleStructure(RNA* strand) {
     }
     
     // in the case that there is nothing probably found treat as a draw for j -1
-    /* if(!found) { */
-    /*   --j; */
-    /* } */
+    if(!found) {
+      free(sample);
+      return 0;
+    }
   }
   
   while (stack)
