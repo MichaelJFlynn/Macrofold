@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   sample(strand, 1000);
   approxTime = clock() - start;
 
-  printf("%s\t%d\t%ju\t%ju\n", 
+  printf("%s\t%d\t%u\t%u\n", 
 	 argv[1], 
 	 strand->length, 
 	 normalTime, 

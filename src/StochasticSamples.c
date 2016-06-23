@@ -14,7 +14,7 @@ typedef int bool;
 
 
 StochasticSamples* allocateStochasticSamples(RNA* strand, int numSamples) {
-  int i;
+
   StochasticSamples* newSamples = (StochasticSamples*) malloc(sizeof(StochasticSamples));
   newSamples->numSamples = numSamples;
   newSamples->structures = (Structure*) calloc(numSamples, sizeof(Structure));
@@ -70,7 +70,7 @@ void sample(RNA* strand, int samples) {
       numruns++;
       strand->samples->structures[sample] = sampleStructure(strand);
       if(!strand->samples->structures[sample]) { 
-	printf("Bad structure (sample: %d) (numruns: %d)\n", sample, numruns);
+	//printf("Bad structure (sample: %d) (numruns: %d)\n", sample, numruns);
       }
     }
   }

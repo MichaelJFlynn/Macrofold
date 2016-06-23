@@ -169,6 +169,9 @@ double ed3(RNA* strand, int i, int j)
 
 double ed5(RNA* strand, int i, int j)
 {
+  if(i <= 0) { 
+    return 0;
+  }
   int* nSeq = strand->intSequence;
   return strand->energyModel->dangle5[nSeq[j]][nSeq[i]][nSeq[i - 1]];
 }

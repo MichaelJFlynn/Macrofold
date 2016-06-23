@@ -49,7 +49,7 @@ AllowedPairs* fromProbablePairs(RNA* strand, float threshold) {
   ap->ij = (PairIterator**) malloc(length * sizeof(PairIterator*));
 
   double** P = strand->partitionFunction->P;
-  double** Zb = strand->partitionFunction->Zb;
+  //double** Zb = strand->partitionFunction->Zb;
 
   for(i =0; i < length; i++) {
     ap->ij[i] = allocatePairIterator(length);
@@ -84,7 +84,7 @@ AllowedPairs* fromProbablePairs2(RNA* strand, float threshold) {
   ap->ji = (PairIterator**) malloc(length * sizeof(PairIterator*));
   ap->ij = (PairIterator**) malloc(length * sizeof(PairIterator*));
 
-  double** P = strand->partitionFunction->P;
+  //double** P = strand->partitionFunction->P;
   double** Zb = strand->partitionFunction->Zb;
 
   for(i =0; i < length; i++) {
