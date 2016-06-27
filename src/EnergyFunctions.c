@@ -137,7 +137,7 @@ double stackTerm(RNA* strand, int i, int j)
 {
   int length = strand->length;
   int* nSeq = strand->intSequence;
-  if (i == length - 1 || j == length)
+  if (i == length - 1 || j == 0 || j == length)
     return 0.0;
 
   if (i > length)

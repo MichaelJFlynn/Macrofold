@@ -46,17 +46,17 @@ int main(int argc, char* argv[]) {
   sample(strand, 1000);
   sixTime = clock() - start;
 
-  strand->allowedPairs = fromProbablePairs(strand, 1e-4);
-  start = clock();
-  sample(strand, 1000);
-  fourTime = clock() - start;
+  /* strand->allowedPairs = fromProbablePairs(strand, 1e-4); */
+  /* start = clock(); */
+  /* sample(strand, 1000); */
+  /* fourTime = clock() - start; */
 
-  printf("%s\t%d\t%ju\t%ju\t%ju\t%ju\t%ju\n", 
+  printf("%s\t%d\t%ju\t%ju\t%ju\t%ju\n", 
 	 argv[1], 
 	 strand->length, 
 	 normalTime, 
 	 tenTime,
 	 eightTime,
-	 sixTime,
-	 fourTime);
+	 sixTime
+	 );
 }
