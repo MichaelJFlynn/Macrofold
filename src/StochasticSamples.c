@@ -68,6 +68,9 @@ void sample(RNA* strand, int samples) {
   for(sample =0; sample < samples; sample++) {
     while(!strand->samples->structures[sample]) { 
       numruns++;
+      if(numruns > 100*samples) {
+	exit(-1);
+      }
       strand->samples->structures[sample] = sampleStructure(strand);
       if(!strand->samples->structures[sample]) { 
 	//printf("Bad structure (sample: %d) (numruns: %d)\n", sample, numruns);
@@ -157,36 +160,41 @@ Structure sampleStructure(RNA* strand) {
 	  //setDangle3(j-1, upst, dnst);
 	  push(&stack, k, j-1, 0);
 	  j = 0;
+	  found = TRUE;
 	  break;
 	} else
 	  rnd -= auPenalty(strand, k, j-1) * Zb[k][j-1] * ed3(strand, k, j-1) / scale[k];
 	
 	if(k > 0) {
-	  if(rnd <= auPenalty(strand, k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1)) {
+	  if(rnd <= auPenalty(strand, k, j-1) * Z[0][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1)) {
 	    //setDangle3(j-1, upst, dnst);
 	    push(&stack, k, j-1, 0);
 	    j = k - 1;
+	    found = TRUE;
 	    break;
 	  } else 
-	    rnd -= auPenalty(strand, k, j-1) * Z[1][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1);
+	    rnd -= auPenalty(strand, k, j-1) * Z[0][k - 1] * Zb[k][j-1] * ed3(strand, k, j-1);
 	  
 	  if(rnd <= auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1]) {
 	    //setDangle5(k, upst, dnst);
 	    //setDangle3(j-1, upst, dnst);
 	    push(&stack, k, j-1, 0);
 	    j = 0;
+	    found = TRUE;
 	    break;
 	  } else
 	    rnd -= auPenalty(strand, k, j-1) * Zb[k][j-1] * etstackm(strand, k, j-1) / scale[k-1];
 	}
 	
 	if(k > 1) {
-	  if(rnd <= auPenalty(strand, k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2)) {
+	  if(rnd <= auPenalty(strand, k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2)) {
 	    //setDangle5(k, upst, dnst);
 	    //setDangle3(j-1, upst, dnst);
 	    push(&stack, k, j-1, 0);
+	    j = k - 2;
+	    found = TRUE;
 	  } else 
-	    rnd -= auPenalty(strand, k, j-1) * Z[1][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2);
+	    rnd -= auPenalty(strand, k, j-1) * Z[0][k-2] * Zb[k][j-1] * etstackm(strand, k, j-2);
 	}
       } // j-1 pairs for loop
     }
@@ -269,10 +277,11 @@ Structure sampleStructure(RNA* strand) {
 	      // should not get here
 	      
 	      if(!found) {
-		free(sample);
-		return 0;
+		//free(sample);
+		//return 0;
+		printf("Zb sampling not exhaustive, something is wrong\n");
+		exit(-1);
 	      }
-	      continue;
 	    }
 	}
       else if (top->matrix == 1) /* Z1 */
