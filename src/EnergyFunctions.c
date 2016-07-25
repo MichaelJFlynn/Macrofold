@@ -127,7 +127,6 @@ double bulgeInternalTermPeriodic(RNA* strand, int i, int j)
   return energy;
 }
 
-
 double auPenalty(RNA* strand, int i, int j) {
   int* nSeq = strand->intSequence;
   return strand->energyModel->auPenalty[nSeq[i]][nSeq[j]];
