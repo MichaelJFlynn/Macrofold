@@ -54,6 +54,7 @@ typedef struct EnergyModel {
   TetraLoop tloop[NUM_TLOOPS];
   TriLoop triloop[NUM_TRILOOPS];
   double tstack[4][4][4][4];
+  double int11[4][4][4][4][4][4];
   // * tstackcoax
   // * tstackh
   // * tstacki
@@ -75,6 +76,7 @@ void loadTStack(RNA* strand);
 void loadTloop(RNA* strand);
 void loadHexaloop(RNA* strand);
 void loadTriloop(RNA* strand);
+void loadInt11(RNA* strand);
 void initializeEnergyModel(RNA* strand);
 void freeEnergyModel(RNA* strand);
 

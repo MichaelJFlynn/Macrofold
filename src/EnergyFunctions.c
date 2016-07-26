@@ -205,9 +205,10 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
 	return em->bulgeLoop[loopSize1 - 1] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
       else
 	return em->bulgeLoop[29] * pow(HAIRPINBASE, log((double) loopSize1 / 30)) / em->scale[loopSize1 - 30] * auPenalty(strand, i, j) * auPenalty(strand, ii, jj);
-    } /* Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
+    } 
   else if (loopSize1 == 1 && loopSize2 == 1)
-    return g_sint2[basePairIndex(nSeq[i], nSeq[j])][basePairIndex(nSeq[ii], nSeq[jj])][nSeq[i + 1]][nSeq[j - 1]];
+    return em->int11[nSeq[i]][nSeq[i+1]][nSeq[ii]][nSeq[jj]][nSeq[j-1]][nSeq[j]];
+  /*  Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
   else if (loopSize1 == 1 && loopSize2 == 2)
     return g_asint1x2[basePairIndex(nSeq[i], nSeq[j])][basePairIndex(nSeq[ii], nSeq[jj])][nSeq[i + 1]][nSeq[j - 1]][nSeq[j - 2]];
   else if (loopSize1 == 2 && loopSize2 == 1)

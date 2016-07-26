@@ -73,6 +73,7 @@ void initializeEnergyModel(RNA* strand) {
   loadTloop(strand);
   loadHexaloop(strand);
   loadTriloop(strand);
+  loadInt11(strand);
 }
 
 void freeEnergyModel(RNA* strand) {
@@ -217,3 +218,20 @@ void loadTriloop(RNA* strand) {
   }
 }
 
+
+void loadInt11(RNA* strand) { 
+  DataFile* int11Data = readCSV("../data/int11.csv");
+  int i;
+
+  // ref'd at:
+  // 5pOuter - 3pouter - 5pInner - 3pInner
+  for(i = 0; i < int11Data->nrow; i++) {
+      strand->energyModel->int11[baseMap(get(int11Data,i,0))]
+	[baseMap(get(int11Data,i,1))] 
+	[baseMap(get(int11Data,i,2))] 
+	[baseMap(get(int11Data,i,3))]
+	[baseMap(get(int11Data,i,4))]
+	[baseMap(get(int11Data,i,5))] = exp(-atof(get(int11Data,i,6)) / (R * strand->temperature)) / strand->energyModel->scale[4];
+  }  
+  freeDataFile(int11Data);
+}
