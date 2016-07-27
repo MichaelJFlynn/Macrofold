@@ -235,3 +235,20 @@ void loadInt11(RNA* strand) {
   }  
   freeDataFile(int11Data);
 }
+
+void loadInt21(RNA* strand) {
+  DataFile* int21Data = readCSV("../data/int21.csv");
+  int i;
+
+  for(i = 0; i < int21Data->nrow; ++i) {
+      strand->energyModel->int21[baseMap(get(int21Data,i,0))]
+        [baseMap(get(int21Data,i,1))]
+        [baseMap(get(int21Data,i,2))]
+        [baseMap(get(int21Data,i,3))]
+        [baseMap(get(int21Data,i,4))]
+        [baseMap(get(int21Data,i,5))]
+        [baseMap(get(int21Data,i,6))] = exp(-atof(get(int21Data,i,7)) / (R * strand->temperature)) / strand->energyModel->scale[5];
+  }
+  freeDataFile(int21DATA);
+} 
+
