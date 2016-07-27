@@ -186,7 +186,7 @@ def convert1x1():
 
     outputFile.write("5primeOuter,5primeMismatch,5primeInner,3primeInner,3primeMismatch,3primeOuter,Energy\n")
 
-    skip = 32
+    skip = 30
     mismatch5primeIndex = 0
     outerIndex = 0
     for line in file1x1:
@@ -213,9 +213,51 @@ def convert1x1():
     outputFile.close()
 
 
+# parse the 2x1 energy file into .csv
+def convert2x1():
+    # open the files to read and write from/to
+    file2x1 = open("rawdata/int21.txt", 'r')
+    outputFile = open("data/int21.csv", 'w')
+
+    outputFile.write("5primeOuter,5primeMismatch,5primeInner,3primeInner,3primeInnerMismatch,3primeOuterMismatch,3primeOuter,Energy\n")
+
+    skip = 30
+    mismatch5primeIndex = 0
+    outerIndex = 0
+    for n,line in enumerate(file2x1):
+        #print(n+1)
+        if skip > 0:
+            skip -= 1
+            continue
+        tokens = line.split()
+        for i in range(len(tokens)):
+            #print(tokens)
+            energy = tokens[i]
+            #print(energy)
+            #print(i)
+            #print(outerIndex)
+            if energy is ".":
+                continue
+                ##energy = "Inf"
+            #print(outerIndex)
+            (outer5prime, outer3prime) = intToPair(outerIndex // 4)
+            (inner5prime, inner3prime) = intToPair(i // 4)
+            mismatch5prime = intToBase(mismatch5primeIndex)
+            outermismatch3prime = intToBase(i % 4)
+            innermismatch3prime = intToBase(outerIndex % 4)
+            outputFile.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(outer5prime, mismatch5prime, inner5prime, inner3prime, innermismatch3prime, outermismatch3prime, outer3prime, energy))
+        mismatch5primeIndex += 1
+        if mismatch5primeIndex >= 4:
+            mismatch5primeIndex = 0
+            outerIndex += 1
+            skip = 11
+    file2x1.close()
+    outputFile.close()
+
 
 convertHairpinBulgeInternal()
 convertTerminalStack()
 convertDangles()
 convertStack()
 convert1x1()
+convert2x1()
