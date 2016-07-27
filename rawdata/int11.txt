@@ -1,4 +1,3 @@
-
 Data table for symetric interior loops of size 2
 Free energies at 37 degrees for DNA
 Data Arrangement:
@@ -17,7 +16,6 @@ Data Arrangement:
 (C)  .    .    .    .   
 (G)  .    .    .    .   
 (U)  .    .    .    .   
-
 
   
           Y                   Y                   Y                   Y                   Y                   Y
