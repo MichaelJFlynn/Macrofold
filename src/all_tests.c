@@ -23,7 +23,7 @@ void auPenaltyTest() {
 int main(int argc, char* argv[]) {
 
   auPenaltyTest();
-  hairpinTermTest();
+  //hairpinTermTest();
   
 
 }

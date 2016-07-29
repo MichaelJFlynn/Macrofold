@@ -74,6 +74,8 @@ void initializeEnergyModel(RNA* strand) {
   loadHexaloop(strand);
   loadTriloop(strand);
   loadInt11(strand);
+  loadInt21(strand);
+  loadInt22(strand);
 }
 
 void freeEnergyModel(RNA* strand) {
