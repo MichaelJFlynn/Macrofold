@@ -253,7 +253,7 @@ void loadInt21(RNA* strand) {
         [baseMap(get(int21Data,i,5))]
         [baseMap(get(int21Data,i,6))] = exp(-atof(get(int21Data,i,7)) / (R * strand->temperature)) / strand->energyModel->scale[5]; // scale is 2 + n (here n=3)
   }
-  freeDataFile(int21DATA);
+  freeDataFile(int21Data);
 } 
 
 void loadInt22(RNA* strand) {
@@ -270,5 +270,5 @@ void loadInt22(RNA* strand) {
         [baseMap(get(int22Data,i,6))]
         [baseMap(get(int22Data,i,7))] = exp(-atof(get(int22Data,i,8)) / (R * strand->temperature)) / strand->energyModel->scale[6]; // scale is 2 + n (here n=4)
   }
-  freeDataFile(int22DATA);
+  freeDataFile(int22Data);
 } 
