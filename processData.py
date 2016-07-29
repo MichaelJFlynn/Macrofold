@@ -47,7 +47,6 @@ def convertHairpinBulgeInternal():
     bulgeFile.close()
     internalFile.close()
 
-
 def intToBase(num):
     if num == 0: 
         return 'A'
@@ -57,7 +56,6 @@ def intToBase(num):
         return 'G'
     elif num == 3:
         return 'U'
-
 
 def intToPair(num):
     if num == 0: 

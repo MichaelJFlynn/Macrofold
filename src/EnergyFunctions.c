@@ -211,9 +211,9 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
   else if (loopSize1 == 1 && loopSize2 == 2)
     return em->int21[nSeq[i]][nSeq[i+1]][nSeq[ii]][nSeq[jj]][nSeq[j-2]][nSeq[j-1]][nSeq[j]];
   else if (loopSize1 == 2 && loopSize2 == 1)
-    return em->int21[nSeq[jj]][nSeq[j-2]][nSeq[j-1]][nSeq[j]][nSeq[i]][nSeq[i+1]][nSeq[ii]]
+    return em->int21[nSeq[jj]][nSeq[j-2]][nSeq[j-1]][nSeq[j]][nSeq[i]][nSeq[i+1]][nSeq[ii]];
   else if (loopSize1 == 2 && loopSize2 == 2)
-    return em->int22[nSeq[i]][nSeq[i+1]][nSeq[i+2]][nSeq[ii]][nSeq[jj]][nSeq[i-2]][nSeq[j-1]][nSeq[j]]
+    return em->int22[nSeq[i]][nSeq[i+1]][nSeq[i+2]][nSeq[ii]][nSeq[jj]][nSeq[i-2]][nSeq[j-1]][nSeq[j]];
   /*  Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
   else if ((loopSize1 == 2 && loopSize2 == 3) ||
 	   (loopSize1 == 3 && loopSize2 == 2))
