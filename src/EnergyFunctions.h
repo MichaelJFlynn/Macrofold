@@ -17,7 +17,6 @@ double ed3(RNA* strand, int i, int j);
 double ed5(RNA* strand, int i, int j);
 double ebi(RNA* strand, int i, int j, int ii, int jj);
 
-
 /* TODO:
  * g_stack table [check] 
  * g_scalen table [check]

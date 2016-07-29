@@ -73,6 +73,10 @@ def intToPair(num):
     elif num == 5:
         return ('U', 'G')
 
+def intToTwoBase(num):
+    first  = intToBase(num // 4)
+    second = intToBase(num %  4)
+    return (first, second)
 
 def convertStack():
     stackFile = open("rawdata/stack.txt", 'r')
@@ -255,9 +259,51 @@ def convert2x1():
     outputFile.close()
 
 
+# parse the 2x1 energy file into .csv
+def convert2x2():
+    # open the files to read and write from/to
+    file2x2 = open("rawdata/int22.txt", 'r')
+    outputFile = open("data/int22.csv", 'w')
+
+    outputFile.write("5primeOuter,5primeOuterMismatch,5primeInnerMismatch,5primeInner,3primeInner,3primeInnerMismatch,3primeOuterMismatch,3primeOuter,Energy\n")
+
+    skip = 41
+    row = 0
+    outerIndex = 0
+    for n,line in enumerate(file2x2):
+        #print(n+1)
+        if skip > 0:
+            skip -= 1
+            continue
+        tokens = line.split()
+        for col in range(len(tokens)):
+            #print(tokens)
+            energy = tokens[col]
+            #print(energy)
+            #print(i)
+            #print(outerIndex)
+            if energy is ".":
+                continue
+                ##energy = "Inf"
+            #print(outerIndex)
+            (outer5prime, outer3prime) = intToPair(outerIndex // 6)
+            (inner5prime, inner3prime) = intToPair(outerIndex %  6)
+            (outermismatch5prime, outermismatch3prime) = intToTwoBase(row)
+            (innermismatch5prime, innermismatch3prime) = intToTwoBase(col)
+            outputFile.write("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(outer5prime, outermismatch5prime, innermismatch5prime, inner5prime, inner3prime, innermismatch3prime, outermismatch3prime, outer3prime, energy))
+        row += 1
+        if row >= 16:
+            row = 0
+            outerIndex += 1
+            skip = 10
+    file2x2.close()
+    outputFile.close()
+
+
 convertHairpinBulgeInternal()
 convertTerminalStack()
 convertDangles()
 convertStack()
 convert1x1()
 convert2x1()
+convert2x2()

@@ -219,6 +219,8 @@ void loadTriloop(RNA* strand) {
 }
 
 
+/* TODO : make sure the scale factors for following functions are correct */
+
 void loadInt11(RNA* strand) { 
   DataFile* int11Data = readCSV("../data/int11.csv");
   int i;
@@ -231,7 +233,7 @@ void loadInt11(RNA* strand) {
 	[baseMap(get(int11Data,i,2))] 
 	[baseMap(get(int11Data,i,3))]
 	[baseMap(get(int11Data,i,4))]
-	[baseMap(get(int11Data,i,5))] = exp(-atof(get(int11Data,i,6)) / (R * strand->temperature)) / strand->energyModel->scale[4];
+	[baseMap(get(int11Data,i,5))] = exp(-atof(get(int11Data,i,6)) / (R * strand->temperature)) / strand->energyModel->scale[4]; // scale is 2 + n (here n=2)
   }  
   freeDataFile(int11Data);
 }
@@ -247,8 +249,24 @@ void loadInt21(RNA* strand) {
         [baseMap(get(int21Data,i,3))]
         [baseMap(get(int21Data,i,4))]
         [baseMap(get(int21Data,i,5))]
-        [baseMap(get(int21Data,i,6))] = exp(-atof(get(int21Data,i,7)) / (R * strand->temperature)) / strand->energyModel->scale[5];
+        [baseMap(get(int21Data,i,6))] = exp(-atof(get(int21Data,i,7)) / (R * strand->temperature)) / strand->energyModel->scale[5]; // scale is 2 + n (here n=3)
   }
   freeDataFile(int21DATA);
 } 
 
+void loadInt22(RNA* strand) {
+  DataFile* int22Data = readCSV("../data/int22.csv");
+  int i;
+
+  for(i = 0; i < int22Data->nrow; ++i) {
+      strand->energyModel->int22[baseMap(get(int22Data,i,0))]
+        [baseMap(get(int22Data,i,1))]
+        [baseMap(get(int22Data,i,2))]
+        [baseMap(get(int22Data,i,3))]
+        [baseMap(get(int22Data,i,4))]
+        [baseMap(get(int22Data,i,5))]
+        [baseMap(get(int22Data,i,6))]
+        [baseMap(get(int22Data,i,7))] = exp(-atof(get(int22Data,i,8)) / (R * strand->temperature)) / strand->energyModel->scale[6]; // scale is 2 + n (here n=4)
+  }
+  freeDataFile(int22DATA);
+} 

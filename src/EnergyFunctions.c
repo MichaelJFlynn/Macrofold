@@ -212,10 +212,9 @@ double ebi(RNA* strand, int i, int j, int ii, int jj)
     return em->int21[nSeq[i]][nSeq[i+1]][nSeq[ii]][nSeq[jj]][nSeq[j-2]][nSeq[j-1]][nSeq[j]];
   else if (loopSize1 == 2 && loopSize2 == 1)
     return em->int21[nSeq[jj]][nSeq[j-2]][nSeq[j-1]][nSeq[j]][nSeq[i]][nSeq[i+1]][nSeq[ii]]
-  //  return g_asint1x2[basePairIndex(nSeq[jj], nSeq[ii])][basePairIndex(nSeq[j], nSeq[i])][nSeq[jj + 1]][nSeq[ii - 1]][nSeq[ii - 2]];
-  /*  Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
   else if (loopSize1 == 2 && loopSize2 == 2)
-    return g_sint4[basePairIndex(nSeq[i], nSeq[j])][basePairIndex(nSeq[ii], nSeq[jj])][nSeq[i + 1]][nSeq[j - 1]][nSeq[i + 2]][nSeq[j - 2]];
+    return em->int22[nSeq[i]][nSeq[i+1]][nSeq[i+2]][nSeq[ii]][nSeq[jj]][nSeq[i-2]][nSeq[j-1]][nSeq[j]]
+  /*  Might leave these out (they are in the 2004 data tables, and we want 1999 for simplicity
   else if ((loopSize1 == 2 && loopSize2 == 3) ||
 	   (loopSize1 == 3 && loopSize2 == 2))
     return g_tstacki23[nSeq[i]][nSeq[j]][nSeq[i + 1]][nSeq[j - 1]] *
