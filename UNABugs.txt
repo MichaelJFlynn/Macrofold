@@ -1,0 +1,5 @@
+A list of bugs in UNAFold
+
+- unfolded state is not allowed
+- the hairpin energies all seem to be different from what Turner suggests (5.7 vs 4.1)
+- noIsolate not working

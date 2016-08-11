@@ -1,0 +1,2 @@
+Error: data not specified
+Run 'hybrid-ss -h' for help

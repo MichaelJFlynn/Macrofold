@@ -1,0 +1,10 @@
+hybrid-ss-min 3.9 ran on ./tests/current_test at Thu Aug 11 11:37:49 2016
+
+NA = RNA
+tMin = 37
+tInc = 1
+tMax = 37
+[Na+] = 1
+[Mg++] = 0
+maxloop = 30
+prefilter 2/2

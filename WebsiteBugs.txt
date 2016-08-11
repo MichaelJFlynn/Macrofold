@@ -1,0 +1,5 @@
+A list of bugs from the website http://rna.urmc.rochester.edu/NNDB/turner99/
+
+- http://rna.urmc.rochester.edu/NNDB/turner99/hairpin-example-1.html explicitly includes the AU penalty in energy calculation. But it should not, because in hairpin loops and internal loops, the AU penalty is already taken into account by the terminalMismatch term.
+
+- http://rna.urmc.rochester.edu/NNDB/turner99/hairpin.html "tertraloops" should be changed to "tetraloops"
